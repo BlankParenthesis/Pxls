@@ -50,7 +50,7 @@ public class Database {
         jdbi.useHandle(handle -> {
             // pixels
             handle.createUpdate("CREATE TABLE IF NOT EXISTS pixels (" +
-                    "id BIGSERIAL NOT NULL PRIMARY KEY," +
+                    "id SERIAL NOT NULL PRIMARY KEY," +
                     "x INT NOT NULL," +
                     "y INT NOT NULL," +
                     "color SMALLINT NOT NULL," +
@@ -74,8 +74,8 @@ public class Database {
                     "cooldown_expiry TIMESTAMP," +
                     "role VARCHAR(16) NOT NULL DEFAULT 'USER'," +
                     "ban_expiry TIMESTAMP," +
-                    "signup_ip INET," +
-                    "last_ip INET," +
+                    "signup_ip varchar(20)," +
+                    "last_ip varchar(20)," +
                     "last_ip_alert BOOL NOT NULL DEFAULT false," +
                     "perma_chat_banned BOOL DEFAULT false," +
                     "chat_ban_expiry TIMESTAMP DEFAULT NOW()," +
@@ -103,11 +103,11 @@ public class Database {
                     "id SERIAL NOT NULL PRIMARY KEY," +
                     "who INT," +
                     "time TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
-                    "ip INET)")
+                    "ip varchar(20))")
                     .execute();
             // admin_log
             handle.createUpdate("CREATE TABLE IF NOT EXISTS admin_log (" +
-                    "id BIGSERIAL PRIMARY KEY," +
+                    "id SERIAL PRIMARY KEY," +
                     "channel VARCHAR(255)," +
                     "level INT," +
                     "message TEXT," +
@@ -155,7 +155,7 @@ public class Database {
                     .execute();
             // chat_messages
             handle.createUpdate("CREATE TABLE IF NOT EXISTS chat_messages (" +
-                    "id BIGSERIAL PRIMARY KEY," +
+                    "id SERIAL PRIMARY KEY," +
                     "author INT," +
                     "sent BIGINT NOT NULL," +
                     "content VARCHAR(2048) NOT NULL," +
@@ -178,7 +178,7 @@ public class Database {
             handle.createUpdate("CREATE TABLE IF NOT EXISTS ip_log (" +
                     "id SERIAL NOT NULL PRIMARY KEY," +
                     "\"user\" INT NOT NULL," +
-                    "ip INET NOT NULL," +
+                    "ip varchar(20) NOT NULL," +
                     "last_used TIMESTAMP NOT NULL DEFAULT NOW());" +
                     "CREATE UNIQUE INDEX IF NOT EXISTS \"ip_log_user_ip_pair\" ON \"ip_log\" (\"user\", \"ip\")")
                     .execute();
@@ -274,7 +274,7 @@ public class Database {
      * @param seconds The amount of seconds until the cooldown expires.
      */
     public void updateUserTime(int id, long seconds) {
-        jdbi.useHandle(handle -> handle.createUpdate("UPDATE users SET cooldown_expiry = NOW() + :seconds * '1 SECOND'::INTERVAL WHERE id = :id")
+        jdbi.useHandle(handle -> handle.createUpdate("UPDATE users SET cooldown_expiry = NOW() + INTERVAL :seconds SECOND WHERE id = :id")
                 .bind("seconds", seconds)
                 .bind("id", id)
                 .execute());
@@ -365,7 +365,7 @@ public class Database {
      * @return A list of rollback pixels.
      */
     public List<DBRollbackPixel> getRollbackPixels(User who, int fromSeconds) {
-        return jdbi.withHandle(handle -> handle.select("SELECT id, secondary_id FROM pixels WHERE most_recent AND who = :who AND (time + :seconds * '1 SECOND'::INTERVAL > NOW())")
+        return jdbi.withHandle(handle -> handle.select("SELECT id, secondary_id FROM pixels WHERE most_recent AND who = :who AND (time + INTERVAL :seconds SECOND > NOW())")
                 .bind("who", who.getId())
                 .bind("seconds", fromSeconds)
                 .mapToMap()
@@ -667,7 +667,7 @@ public class Database {
      * @return The user.
      */
     public Optional<DBUser> createUser(String name, String login, String ip) {
-        jdbi.useHandle(handle -> handle.createUpdate("INSERT INTO users (username, login, signup_ip, last_ip, chat_name_color) VALUES (:username, :login, :ip::INET, :ip::INET, :chat_name_color)")
+        jdbi.useHandle(handle -> handle.createUpdate("INSERT INTO users (username, login, signup_ip, last_ip, chat_name_color) VALUES (:username, :login, :ip, :ip, :chat_name_color)")
                 .bind("username", name)
                 .bind("login", login)
                 .bind("ip", ip)
@@ -725,7 +725,7 @@ public class Database {
      * @param time The new time length from now, in seconds.
      */
     public void updateBan(User user, long time) {
-        jdbi.useHandle(handle -> handle.createUpdate("UPDATE users SET ban_expiry = NOW() + :expiry * '1 SECOND'::INTERVAL WHERE id = :who")
+        jdbi.useHandle(handle -> handle.createUpdate("UPDATE users SET ban_expiry = NOW() + INTERVAL :expiry SECOND WHERE id = :who")
                 .bind("who", user.getId())
                 .bind("expiry", time)
                 .execute());
@@ -761,7 +761,7 @@ public class Database {
      * @param ip The new last IP.
      */
     public void updateUserIP(User user, String ip) {
-        jdbi.useHandle(handle -> handle.createUpdate("UPDATE users SET last_ip = :ip::INET WHERE id = :who")
+        jdbi.useHandle(handle -> handle.createUpdate("UPDATE users SET last_ip = :ip WHERE id = :who")
                 .bind("who", user.getId())
                 .bind("ip", ip)
                 .execute());
@@ -867,7 +867,7 @@ public class Database {
      * Invalidates sessions older than 24 days.
      */
     public void clearOldSessions() {
-        jdbi.useHandle(handle -> handle.createUpdate("DELETE FROM sessions WHERE (time + '24 DAYS'::INTERVAL) < NOW()")
+        jdbi.useHandle(handle -> handle.createUpdate("DELETE FROM sessions WHERE (time + INTERVAL 24 DAY) < NOW()")
                 .execute());
     }
 
@@ -932,7 +932,7 @@ public class Database {
      * @return The inserted row ID.
      */
     public Integer insertAdminLog(int who, String message) {
-        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO admin_log (channel, level, message, time, userid) VALUES ('pxlsCanvas', 200, :message, (SELECT EXTRACT(EPOCH FROM NOW())), :who)")
+        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO admin_log (channel, level, message, time, userid) VALUES ('pxlsCanvas', 200, :message, (SELECT UNIX_TIMESTAMP(NOW())), :who)")
                 .bind("who", who)
                 .bind("message", message)
                 .execute());
@@ -944,7 +944,7 @@ public class Database {
      * @return The inserted row ID.
      */
     public Integer insertServerAdminLog(String message) {
-        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO admin_log (channel, level, message, time, userid) VALUES ('pxlsConsole', 200, :message, (SELECT EXTRACT(EPOCH FROM NOW())), NULL)")
+        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO admin_log (channel, level, message, time, userid) VALUES ('pxlsConsole', 200, :message, (SELECT UNIX_TIMESTAMP(NOW())), NULL)")
                 .bind("message", message)
                 .execute());
     }
@@ -959,7 +959,7 @@ public class Database {
      * @return The inserted row ID.
      */
     public Integer insertReport(int reporter, int reported, int pixel, int x, int y, String message) {
-        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO reports (who, reported, pixel_id, x, y, message, time) VALUES (:reporter, :reported, :pixel, :x, :y, :message, (SELECT EXTRACT(EPOCH FROM NOW())))")
+        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO reports (who, reported, pixel_id, x, y, message, time) VALUES (:reporter, :reported, :pixel, :x, :y, :message, (SELECT UNIX_TIMESTAMP(NOW())))")
                 .bind("reporter", reporter)
                 .bind("reported", reported)
                 .bind("pixel", pixel)
@@ -995,7 +995,7 @@ public class Database {
      * @param message The report message.
      */
     public Integer insertServerReport(int reported, String message) {
-        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO reports (who, pixel_id, x, y, message, reported, time) VALUES (0, 0, 0, 0, :message, :reported, (SELECT EXTRACT(EPOCH FROM NOW())))")
+        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO reports (who, pixel_id, x, y, message, reported, time) VALUES (0, 0, 0, 0, :message, :reported, (SELECT UNIX_TIMESTAMP(NOW())))")
                 .bind("message", message)
                 .bind("reported", reported)
                 .executeAndReturnGeneratedKeys("id")
@@ -1009,7 +1009,7 @@ public class Database {
      * @return Whether or not the specified {@link User} has other {@link User}s with the same sign-up IP or last IP.
      */
     public boolean haveDuplicateIP(int who, String ip) {
-        return jdbi.withHandle(handle -> handle.select("SELECT EXISTS(SELECT 1 FROM users WHERE (last_ip = :ip::INET OR signup_ip = :ip::INET) AND id <> :who )")
+        return jdbi.withHandle(handle -> handle.select("SELECT EXISTS(SELECT 1 FROM users WHERE (last_ip = :ip OR signup_ip = :ip) AND id <> :who )")
                 .bind("ip", ip)
                 .bind("who", who)
                 .mapTo(Boolean.class)
@@ -1023,7 +1023,7 @@ public class Database {
      * @return The count of found {@link User} IDs.
      */
     public int getDuplicateCount(int who, String ip) {
-        return jdbi.withHandle(handle -> handle.select("SELECT count(id) FROM users WHERE (last_ip = :ip::INET or signup_ip = :ip::INET) AND id <> :who")
+        return jdbi.withHandle(handle -> handle.select("SELECT count(id) FROM users WHERE (last_ip = :ip or signup_ip = :ip) AND id <> :who")
                 .bind("ip", ip)
                 .bind("who", who)
                 .mapTo(Integer.class)
@@ -1037,7 +1037,7 @@ public class Database {
      * @return A list of the found {@link User} IDs.
      */
     public List<Integer> getDuplicateUsers(int who, String ip) {
-        return jdbi.withHandle(handle -> handle.select("SELECT id FROM users WHERE (last_ip = :ip::INET OR signup_ip = :ip::INET) AND id <> :who")
+        return jdbi.withHandle(handle -> handle.select("SELECT id FROM users WHERE (last_ip = :ip OR signup_ip = :ip) AND id <> :who")
                 .bind("ip", ip)
                 .bind("who", who)
                 .mapTo(Integer.class)
@@ -1050,7 +1050,7 @@ public class Database {
      * @return The inserted row ID.
      */
     public Integer insertLookup(Integer who, String ip) {
-        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO lookups (who, ip) VALUES (:who, :ip::INET)")
+        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO lookups (who, ip) VALUES (:who, :ip)")
                 .bind("who", who)
                 .bind("ip", ip)
                 .execute());
@@ -1256,7 +1256,7 @@ public class Database {
      * @return The inserted row ID.
      */
     public Integer insertChatReport(int cmid, int targetID, int initiatorID, String reportMessage) {
-        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO chat_reports (cmid, target, initiator, report_message, time) VALUES (:cmid, :target, :initiator, :report_message, (SELECT EXTRACT(EPOCH FROM NOW())))")
+        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO chat_reports (cmid, target, initiator, report_message, time) VALUES (:cmid, :target, :initiator, :report_message, (SELECT UNIX_TIMESTAMP(NOW())))")
                 .bind("cmid", cmid)
                 .bind("target", targetID)
                 .bind("initiator", initiatorID)
@@ -1387,7 +1387,7 @@ public class Database {
      * @return A list of notifications.
      */
     public List<DBNotification> getNotifications(boolean expired) {
-        return jdbi.withHandle(handle -> handle.select("SELECT n.id, n.time, n.expiry, n.title, n.content, n.who, u.username AS who_name FROM notifications n LEFT OUTER JOIN users u ON u.id = n.who WHERE CASE WHEN :expired THEN TRUE ELSE (SELECT EXTRACT(EPOCH FROM NOW())) < n.expiry OR n.expiry = 0 END ORDER BY n.time DESC")
+        return jdbi.withHandle(handle -> handle.select("SELECT n.id, n.time, n.expiry, n.title, n.content, n.who, u.username AS who_name FROM notifications n LEFT OUTER JOIN users u ON u.id = n.who WHERE CASE WHEN :expired THEN TRUE ELSE (SELECT UNIX_TIMESTAMP(NOW())) < n.expiry OR n.expiry = 0 END ORDER BY n.time DESC")
                 .bind("expired", expired)
                 .map(new DBNotification.Mapper())
                 .list());
@@ -1425,7 +1425,7 @@ public class Database {
      * @return The created notification's ID.
      */
     public Integer createNotification(int creatorID, String title, String content, Long expiry) {
-        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO notifications (time, expiry, title, content, who) VALUES (EXTRACT(epoch FROM CURRENT_TIMESTAMP)::INTEGER, :expiry, :title, :content, :who)")
+        return jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO notifications (time, expiry, title, content, who) VALUES (EXTRACT(epoch FROM CURRENT_TIMESTAMP), :expiry, :title, :content, :who)")
                 .bind("who", creatorID)
                 .bind("title", title)
                 .bind("content", content)
@@ -1486,7 +1486,7 @@ public class Database {
      * @param ip The IP.
      */
     public void insertOrUpdateIPLog(int id, String ip) {
-        jdbi.useHandle(handle -> handle.createUpdate("INSERT INTO ip_log (\"user\", \"ip\") VALUES (:id, :ip::INET) ON CONFLICT (\"user\", \"ip\") DO UPDATE SET \"last_used\" = NOW() WHERE \"ip_log\".\"user\" = :id AND \"ip_log\".\"ip\" = :ip::INET")
+        jdbi.useHandle(handle -> handle.createUpdate("INSERT INTO ip_log (\"user\", \"ip\") VALUES (:id, :ip) ON CONFLICT (\"user\", \"ip\") DO UPDATE SET \"last_used\" = NOW() WHERE \"ip_log\".\"user\" = :id AND \"ip_log\".\"ip\" = :ip")
                 .bind("id", id)
                 .bind("ip", ip)
                 .execute());
