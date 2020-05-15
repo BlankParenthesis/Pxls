@@ -11,6 +11,12 @@ html {
     --input-border-color: #1600fd;
     --input-placeholder-text-color: #bbb;
 
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-20 -16 32 32'%3E%3Cpath fill='%23ccc' d='M0,4.5 L-5,-2.4 L5,-2.4 Z'/%3E%3C/svg%3E");
+    --input-group-background: #0048ff;
+    --input-accent-color: #00bbffb3;
+    --input-range-handle-background: #ccc;
+    --input-range-handle-stripe-color: #0004;
+
     --button-background: #0048ff;
     --button-text-color: #fff;
     --button-border-color-hover: #44886e;
@@ -34,8 +40,6 @@ html {
     --panel-header-background: linear-gradient(to bottom, #0051fffc, #03f);
     --panel-background: #043aee;
     --panel-text-color: #eee;
-
-    --option-bubble-position-background-selected: #03f;
 
     --chat-separator-color: #0d47f4;
     --chat-odd-background: #0234d9;

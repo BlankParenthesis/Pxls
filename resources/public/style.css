@@ -69,7 +69,22 @@ html {
     --input-background: #fff;
     --input-border-color: #ccc;
     --input-placeholder-text-color: #666;
-
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-20 -16 32 32'%3E%3Cpath fill='%23000' d='M0,4.5 L-5,-2.4 L5,-2.4 Z'/%3E%3C/svg%3E");
+    --input-group-background: #e8e8e8;
+    --input-border-color-focus: var(--input-border-color);
+    --input-box-shadow-color-focus: var(--ping-highlight-color);
+    --fake-checkbox-unchecked-mark: none;
+    --fake-checkbox-checked-mark: '\f00c'; /* font awesome check */
+    --fake-checkbox-indeterminate-mark: none;
+    --input-accent-color: #6495ED;
+    --input-focus-outline-color: var(--input-accent-color);
+    --input-checkbox-background-checked: var(--input-accent-color);
+    --input-checkbox-text-color: #fff;
+    --input-checkbox-text-color-checked: var(--input-checkbox-text-color);
+    --input-range-filled-background: var(--input-accent-color);
+    --input-range-handle-background: #eee;
+    --input-range-handle-stripe-color: #0003;
+    
     --text-blue-color:#00a;
     --text-green-color:#0a0;
     --text-red-color:#a00;
@@ -105,10 +120,6 @@ html {
     --panel-article-footer-background: var(--panel-footer-background);
 
     --panel-trigger-outline-color: #AAA;
-
-    --option-bubble-position-border-color-hovered: #6495ED;
-    --option-bubble-position-background-hovered: rgba(0, 0, 0, 0);
-    --option-bubble-position-background-selected: #eee;
 
     --chat-separator-color: #bfbfbf;
     --chat-odd-background: #d5d5d5;
@@ -175,6 +186,11 @@ html, body {
     box-sizing: border-box;
 }
 
+p {
+    padding: 0;
+    margin: .5rem 0;
+}
+
 .float-left {
     float: left !important;
 }
@@ -189,6 +205,16 @@ html, body {
 
 .hidden {
     display: none !important;
+}
+
+.visually-hidden, .styled-checkbox {
+    position: absolute !important;
+    display: block;
+    width: 1px !important;
+    height: 1px !important;
+    border: 0 !important;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
 }
 
 .fullwidth {
@@ -242,104 +268,6 @@ kbd {
 }
 
 .useMono {
-  font-family: monospace;
-}
-
-input:disabled, button:disabled {
-    cursor: not-allowed;
-}
-
-input[type="text"], input[type="number"], textarea, select {
-    padding: 0.5em;
-    border: 1px solid #ccc;
-    border: 1px solid var(--input-border-color);
-    background: #fff;
-    background: var(--input-background);
-    color: #000;
-    color: var(--input-text-color);
-}
-
-/* NOTE (Flying): Does not work grouped together. */
-input[type="text"]::placeholder {
-    color: var(--input-placeholder-text-color);
-}
-input[type="number"]::placeholder {
-    color: var(--input-placeholder-text-color);
-}
-textarea::placeholder {
-    color: var(--input-placeholder-text-color);
-}
-select::placeholder {
-    color: var(--input-placeholder-text-color);
-}
-
-button {
-    cursor: pointer;
-    display: inline-block;
-    color: inherit;
-    background: transparent;
-    padding: 0;
-    margin: 0;
-    border: 0;
-    line-height: 1.1em;
-    outline: none;
-}
-
- button::-moz-focus-inner {
-    border: 0;
-}
-
-button.text-button {
-    margin-top: 6px;
-    margin-right: 4.5px;
-    display: inline-block;
-    font-size: 12px;
-    border: 1px solid #999;
-    border: 1px solid var(--button-border-color);
-    padding: 5px 10px;
-    border-radius: 3px;
-    background: #ddd;
-    background: var(--button-background);
-    color: #000;
-    color: var(--button-text-color);
-}
-
-button.text-button:disabled {
-    border: 1px solid #777;
-    border: 1px solid var(--button-border-color-disabled);
-    background: #aaa;
-    background: var(--button-background-disabled);
-    color: #555;
-    color: var(--button-text-color-disabled);
-}
-
-button.text-button:hover {
-    color: #fff;
-    color: var(--button-text-color-hover);
-    background: #ce4747;
-    background: var(--button-background-hover);
-    border-color: var(--button-border-color-hover);
-}
-
-button.dangerous-button {
-    background: #e20;
-    background: var(--dangerous-button-background);
-    color: #fff;
-    color: var(--dangerous-button-text-color);
-    border-color: unset;
-    border-color: var(--dangerous-button-border-color);
-}
-
-button.dangerous-button:hover {
-    color: #fff;
-    color: var(--dangerous-button-text-color-hover);
-    background: #f10;
-    background: var(--dangerous-button-background-hover);
-    border-color: unset;
-    border-color: var(--dangerous-button-border-color-hover);
-}
-
-.use-mono {
     font-family: monospace;
 }
 
@@ -391,6 +319,300 @@ dt {
 .chat-lookup-side {
     max-height: calc(88vh - 30px);
     overflow: auto;
+}
+
+/*//////////////////////////*\
+| Inputs and Buttons
+\*\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+.extra-label {
+    display: block;
+    margin-top: .25em;
+    margin-bottom: .5em;
+    text-indent: 1em;
+}
+
+input:disabled, button:disabled {
+    cursor: not-allowed;
+}
+
+input:disabled {
+    opacity: 0.5;
+}
+
+input[type="text"], input[type="number"], input[type="range"], textarea, select {
+    padding: 0.25em;
+    border: 1px solid #ccc;
+    border: 1px solid var(--input-border-color);
+}
+  
+input, textarea, select, input[type="checkbox"].styled-checkbox + .fake-checkbox {
+    background: #fff;
+    background: var(--input-background);
+    color: #000;
+    color: var(--input-text-color);
+    font-size: 1em;
+}
+
+input[type="number"] {
+    width: 6em;
+}
+
+select {
+    background: var(--select-arrow), var(--input-background);
+    background-size: auto 100%, auto;
+    background-repeat: no-repeat, repeat;
+    background-position: right center, center;
+    padding-right: 1.5em;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+input[type="checkbox"].styled-checkbox + .fake-checkbox {
+    position: relative;
+    min-width: 1.85em;
+    min-height: 1.85em;
+    cursor: pointer;
+    color: var(--input-checkbox-text-color);
+}
+
+input[type="checkbox"].styled-checkbox + .fake-checkbox::before {
+    content: var(--fake-checkbox-unchecked-mark);
+    font-size: 1.25em;
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900; /* fa solid icons */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+input[type="checkbox"].styled-checkbox:checked + .fake-checkbox {
+    background: var(--input-checkbox-background-checked);
+    color: var(--input-checkbox-text-color-checked);
+}
+
+input[type="checkbox"].styled-checkbox:checked + .fake-checkbox::before {
+    content: var(--fake-checkbox-checked-mark);
+}
+
+input[type="checkbox"].styled-checkbox:indeterminate + .fake-checkbox {
+    background: linear-gradient(to bottom, transparent 40%, var(--input-checkbox-background-checked) 40%, var(--input-checkbox-background-checked) 60%, transparent 60%), var(--input-background);
+}
+
+input[type="checkbox"].styled-checkbox:indeterminate + .fake-checkbox::before {
+    content: var(--fake-checkbox-indeterminate-mark);
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+    min-height: 1.5em;
+}
+    
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 11px;
+    /*
+      Chrome doesn't like height: 100% here since the thumb actually statically affects the layout of the range 🙄.
+      Since the range is at least 2em, putting that is a safe bet but if it grows taller this could look weird.
+    */
+    height: 2em;
+
+    border: 0;
+    border-left: 1px solid var(--input-border-color);
+    border-right: 1px solid var(--input-border-color);
+    border-radius: 0;
+    background: linear-gradient(to bottom, var(--input-range-handle-stripe-color), var(--input-range-handle-stripe-color) 20%, transparent 20%, transparent 40%, var(--input-range-handle-stripe-color) 40%, var(--input-range-handle-stripe-color) 60%, transparent 60%, transparent 80%, var(--input-range-handle-stripe-color) 80%), var(--input-range-handle-background);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 7px 10px;
+}
+
+input[type="range"]:not(:disabled)::-webkit-slider-thumb {
+    /*
+      Chrome doesn't have a stylable section before the thumb.
+      To make it look like it does we can add a box shadow the size of the sun to the left.
+      If the input has overflow: hidden it will be clipped and all is good.
+    */
+    box-shadow: -100vw 0 0 100vw var(--input-range-filled-background);
+}
+
+input[type="range"]::-moz-range-track {
+    background: transparent;
+    width: 0;
+}
+
+input[type="range"]:not(:disabled)::-moz-range-progress {
+    height: 100%;
+    background: var(--input-range-filled-background);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 9px;
+    height: 100%;
+    border: 0;
+    border-left: 1px solid var(--input-border-color);
+    border-right: 1px solid var(--input-border-color);
+    border-radius: 0;
+    background: linear-gradient(to bottom, var(--input-range-handle-stripe-color), var(--input-range-handle-stripe-color) 20%, transparent 20%, transparent 40%, var(--input-range-handle-stripe-color) 40%, var(--input-range-handle-stripe-color) 60%, transparent 60%, transparent 80%, var(--input-range-handle-stripe-color) 80%), var(--input-range-handle-background);;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 7px 10px;
+}
+
+.input-group {
+    display: inline-flex;
+    border: 1px solid var(--input-border-color);
+    background: var(--input-group-background);
+    border-radius: .25em;
+    overflow: hidden;
+    padding: 0;
+    vertical-align: middle;
+}
+
+.input-group > * {
+    flex-grow: 1;
+}
+
+.input-group + .input-group {
+    margin-top: 4px;
+}
+
+.input-group:focus-within, input:focus {
+    --input-border-color: var(--input-border-color-focus);
+}
+
+.input-group:focus-within {
+    box-shadow: 0 0 0 .2em var(--input-focus-outline-color);
+}
+
+.input-group:not(.nowrap) {
+    flex-wrap: wrap;
+}
+
+.input-group > input[type="text"], .input-group > input[type="range"], .input-group > input[type="number"], .input-group > select, .input-group > .range-text-value {
+    border: none;
+    border-top: 1px solid var(--input-border-color);
+    border-left: 1px solid var(--input-border-color);
+    margin: -1px 0 0 -1px;
+    align-self: stretch;
+    flex-grow: 999;
+}
+
+.input-group > input[type="range"] ~ .range-text-value {
+    min-width: 4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.input-group > input[type="range"]:disabled ~ .range-text-value {
+    color: var(--text-muted-color);
+}
+
+.input-group > input[type="checkbox"].styled-checkbox + .fake-checkbox {
+    border: none;
+    border-left: 1px solid var(--input-border-color);
+    align-self: stretch;
+}
+
+.input-group > input[type="checkbox"].styled-checkbox + .fake-checkbox.onleft {
+    order: -1;
+    border-left: none;
+    border-right: 1px solid var(--input-border-color);
+}
+
+.input-group > label, label.input-group > .label-text {
+    padding: .325em .75em;
+    align-self: center;
+}
+
+/* NOTE (Flying): Does not work grouped together. */
+input[type="text"]::placeholder {
+    color: var(--input-placeholder-text-color);
+}
+input[type="number"]::placeholder {
+    color: var(--input-placeholder-text-color);
+}
+textarea::placeholder {
+    color: var(--input-placeholder-text-color);
+}
+select::placeholder {
+    color: var(--input-placeholder-text-color);
+}
+
+button {
+    cursor: pointer;
+    display: inline-block;
+    color: inherit;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    line-height: 1.1em;
+    font-size: 1em;
+    outline: none;
+}
+
+ button::-moz-focus-inner {
+    border: 0;
+}
+
+button.text-button {
+    margin-top: 6px;
+    margin-right: 4.5px;
+    display: inline-block;
+    border: 1px solid #999;
+    border: 1px solid var(--button-border-color);
+    padding: 5px 10px;
+    border-radius: 3px;
+    background: #ddd;
+    background: var(--button-background);
+    color: #000;
+    color: var(--button-text-color);
+}
+
+button.text-button:disabled {
+    border: 1px solid #777;
+    border: 1px solid var(--button-border-color-disabled);
+    background: #aaa;
+    background: var(--button-background-disabled);
+    color: #555;
+    color: var(--button-text-color-disabled);
+}
+
+button.text-button:hover {
+    color: #fff;
+    color: var(--button-text-color-hover);
+    background: #ce4747;
+    background: var(--button-background-hover);
+    border-color: var(--button-border-color-hover);
+}
+
+button.dangerous-button {
+    background: #e20;
+    background: var(--dangerous-button-background);
+    color: #fff;
+    color: var(--dangerous-button-text-color);
+    border-color: unset;
+    border-color: var(--dangerous-button-border-color);
+}
+
+button.dangerous-button:hover {
+    color: #fff;
+    color: var(--dangerous-button-text-color-hover);
+    background: #f10;
+    background: var(--dangerous-button-background-hover);
+    border-color: unset;
+    border-color: var(--dangerous-button-border-color-hover);
 }
 
 /*//////////////////////////*\
@@ -496,27 +718,9 @@ body .message {
     margin-left: -1.25rem;
 }
 
-.chatmod-container textarea {
-    width: 100%;
-    border: 1px solid #999;
-}
-
-.chatmod-container input[type=text] {
-    width: 100%;
-}
-
-.chatmod-container label:not(.inline) {
-    display: block;
-}
-
-.chatmod-container select, .chatmod-container input:not([type=check]):not([type=radio]) {
-    display: block;
-    width: 100%;
-    padding: 5px;
-    border: 1px solid #999;
+.chatmod-container select, .chatmod-container input {
     font-family: monospace;
-    font-size: 1.5rem;
-    border-radius: 3px;
+    font-size: x-large;
 }
 
 .buttons {
@@ -939,26 +1143,6 @@ body:not(.show-placeable-bubble) #placeableInfoBubble {
     transform-origin: top left;
 }
 
-#settings .settingToggles > * {
-    margin: 3px 0;
-}
-
-#settings .settingToggles > label {
-    display: block;
-}
-
-#settings input.small-input {
-    width: 6em;
-}
-#settings input[disabled] {
-    opacity: 0.5;
-}
-
-#template-image-error-warning {
-    margin-bottom: 0.5em;
-    display: inline-block;
-}
-
 /*//////////////////////////*\
 | Button Bar
 \*\\\\\\\\\\\\\\\\\\\\\\\\\\*/
@@ -971,20 +1155,37 @@ body:not(.show-placeable-bubble) #placeableInfoBubble {
     display: inline-flex !important;
 }
 
-.button-bar > button {
+.button-bar > * {
     flex: 1 0 auto;
-    padding: 5px;
+}
+
+ul.button-bar {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.button-bar > li {
+    margin: 0;
+    padding: 0;
+}
+
+.button-bar button {
     margin: 0;
     border-width: 1px;
     border-radius: 0;
 }
 
-.button-bar > button:first-child {
+ul.button-bar > li > button {
+    width: 100%;
+}
+
+.button-bar > button:first-child, .button-bar > :first-child button {
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }
 
-.button-bar > button:last-child {
+.button-bar > button:last-child, .button-bar > :last-child button {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
 }
@@ -1268,11 +1469,6 @@ aside.panel.horizontal.right {
     background: var(--panel-article-footer-background);
     border-bottom-left-radius: inherit;
     border-bottom-right-radius: inherit;
-}
-
-.panel-body article p {
-    padding: 0;
-    margin: .5rem 0;
 }
 
 .panel-body article > header h1, .panel-body article > header h2, .panel-body article > header h3, .panel-body article > header h4, .panel-body article > header h5, .panel-body article > header h6 {
@@ -1707,9 +1903,6 @@ ul.chat-history, ul.chatban-history {
 
 .username-color-picker {
     font-family: monospace;
-    font-size: 1.25rem;
-    padding: 5px;
-    border-radius: 5px;
 }
 
 .username-color-picker.rainbow {
@@ -1895,56 +2088,6 @@ body .emoji-picker {
     border-bottom: 1px solid #000;
     border-bottom: 1px solid var(--panel-border-color);
     text-align: center;
-}
-
-/* Settings tweaks */
-#bubble-position {
-    width: 0;
-    grid-template: repeat(2, 1fr) / repeat(2, .5fr);
-    display: grid;
-}
-
-#bubble-position label {
-    position: relative;
-    width: 55px;
-    height: 30px;
-}
-
-#bubble-position label > input {
-    visibility: hidden;
-}
-
-#bubble-position label > div {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: inherit;
-    height: inherit;
-    border: 1px solid #797979;
-}
-
-#bubble-position label:hover > div {
-    border: 2px solid #6495ED;
-    border: 2px solid var(--option-bubble-position-border-color-hovered);
-    background: rgba(0, 0, 0, 0);
-    background: var(--option-bubble-position-background-hovered);
-}
-
-#bubble-position label input:checked ~ div {
-    background: #eee;
-    background: var(--option-bubble-position-background-selected);
-}
-
-/* Chat settings tweaks */
-.chat-settings-wrapper label {
-    display: inline-block;
-    cursor: pointer;
-    user-select: none;
-    margin: 6px 0;
-}
-
-.chat-settings-wrapper input:not([type=checkbox]) {
-    border: 1px solid #888;
 }
 
 /* Notifications */

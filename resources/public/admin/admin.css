@@ -43,7 +43,7 @@
     margin-top: 4px;
 }
 
-.admin-bannumber {
+input[type="number"].admin-bannumber {
     -moz-appearance: textfield;
     width: 40px;
 }

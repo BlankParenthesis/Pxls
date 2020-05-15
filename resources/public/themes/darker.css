@@ -11,6 +11,12 @@ html {
     --button-border-color-hover: transparent;
     --button-background-hover: #252525;
     
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-20 -16 32 32'%3E%3Cpath fill='%23fff' d='M0,4.5 L-5,-2.4 L5,-2.4 Z'/%3E%3C/svg%3E");
+    --input-group-background: #000;
+    --input-range-handle-background: #000;
+    --input-range-handle-stripe-color: #fff3;
+    --input-accent-color: #444;
+    
     --bubble-background: #000;
     
     --floating-panel-text-color: #fff;
@@ -42,8 +48,6 @@ html {
     --panel-close-button-color: #f00;
     --panel-footer-background: #252525;
     --panel-footer-text-color: #999;
-    
-    --option-bubble-position-background-selected: #fff;
     
     --chat-separator-color:#2f2f2f;
     --chat-odd-background:#111;

@@ -43,6 +43,12 @@ html {
     --input-text-color: #ccc;
     --input-background: #2d0c39;
     --input-border-color: #16061c;
+    
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-20 -16 32 32'%3E%3Cpath fill='%23ccc' d='M0,4.5 L-5,-2.4 L5,-2.4 Z'/%3E%3C/svg%3E");
+    --input-group-background: #441256;
+    --input-accent-color: #860d82;
+    --input-range-handle-background: #ccc;
+    --input-range-handle-stripe-color: #0004;
 
     --text-blue-color:#1ea1bb;
     --text-green-color:#34bd53;
@@ -79,10 +85,6 @@ html {
     --panel-article-footer-background: var(--panel-footer-background);
 
     --panel-trigger-outline-color: #AAA;
-
-    --option-bubble-position-border-color-hovered: #797979;
-    --option-bubble-position-background-hovered: #683683;
-    --option-bubble-position-background-selected: #8445a7;
 
     --chat-separator-color: #000;
     --chat-odd-background: rgba(0, 0, 0, 0.1);

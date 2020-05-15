@@ -7,8 +7,14 @@ html {
     --kbd-text-color: #fff;
     
     --input-text-color: #eee;
-    --input-background: #222;
+    --input-background: #191919;
     --input-border-color: #333;
+    
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-20 -16 32 32'%3E%3Cpath fill='%23eee' d='M0,4.5 L-5,-2.4 L5,-2.4 Z'/%3E%3C/svg%3E");
+    --input-group-background: #111;
+    --input-range-handle-background: #ddd;
+    --input-range-handle-stripe-color: #0005;
+    --input-accent-color: #1147A8;
     
     --button-background: #bbb;
     --button-border-color-hover: #844;
@@ -38,7 +44,6 @@ html {
     --panel-footer-background: #2e2e2e;
     --panel-footer-text-color: #666;
     
-    --option-bubble-position-background-selected: #9d9d9d;
     --chat-separator-color: #4f4f4f;
     --chat-odd-background: #3f3f3f;
     --chat-server-action-text-color: #9f9f9f;
