@@ -539,7 +539,7 @@ window.App = (function() {
     };
 
     // these are the settings which have gone from being toggle-off to toggle-on
-    const flippedmappings = ['audio_muted', 'increased_zoom', 'autoReset', 'canvas.unlocked'];
+    const flippedmappings = ['audio_muted', 'increased_zoom', 'canvas.unlocked'];
 
     // Convert old settings keys to new keys.
     Object.entries(keymappings).forEach((entry) => {
@@ -608,6 +608,9 @@ window.App = (function() {
           sensitivity: setting('board.zoom.sensitivity', SettingType.RANGE, 1.5, $('#setting-board-zoom-sensitivity')),
           limit: {
             enable: setting('board.zoom.limit.enable', SettingType.TOGGLE, true, $('#setting-board-zoom-limit-enable'))
+          },
+          rounding: {
+            enable: setting('board.zoom.rounding.enable', SettingType.TOGGLE, false, $('#setting-board-zoom-rounding-enable'))
           }
         },
         template: {
@@ -1114,7 +1117,9 @@ window.App = (function() {
       },
       webInfo: false,
       updateViewport: function(data) {
-        if (!isNaN(data.scale)) self.scale = parseFloat(data.scale);
+        if (!isNaN(data.scale)) {
+          self.setScale(parseFloat(data.scale), false);
+        }
         self.centerOn(data.x, data.y);
       },
       centerOn: function(x, y, ignoreLock = false) {
@@ -1305,7 +1310,7 @@ window.App = (function() {
 
         self.elements.container[0].addEventListener('wheel', function(evt) {
           if (!self.allowDrag) return;
-          const oldScale = self.scale;
+          const oldScale = self.getScale();
 
           let delta = -evt.deltaY;
 
@@ -1325,13 +1330,14 @@ window.App = (function() {
 
           self.nudgeScale(delta);
 
-          if (oldScale !== self.scale) {
+          const scale = self.getScale();
+          if (oldScale !== scale) {
             const dx = evt.clientX - self.elements.container.width() / 2;
             const dy = evt.clientY - self.elements.container.height() / 2;
             self.pan.x -= dx / oldScale;
-            self.pan.x += dx / self.scale;
+            self.pan.x += dx / scale;
             self.pan.y -= dy / oldScale;
-            self.pan.y += dy / self.scale;
+            self.pan.y += dy / scale;
             self.update();
             place.update();
           }
@@ -1442,9 +1448,8 @@ window.App = (function() {
               board.centerOn(query.get('x') >> 0, query.get('y') >> 0);
               break;
             case 'scale':
-              board.setScale(newValue >> 0);
+              board.setScale(newValue >> 0, true);
               break;
-
             case 'template':
               template.queueUpdate({ template: newValue, use: newValue !== null });
               break;
@@ -1513,7 +1518,7 @@ window.App = (function() {
 
           const cx = query.get('x') || self.width / 2;
           const cy = query.get('y') || self.height / 2;
-          self.scale = query.get('scale') || self.scale;
+          self.setScale(query.get('scale') || self.scale, false);
           self.centerOn(cx, cy, true);
           socket.init();
 
@@ -1569,6 +1574,11 @@ window.App = (function() {
           if (color != null) {
             place.switch(parseInt(color));
           }
+
+          settings.board.zoom.rounding.enable.listen(function(value) {
+            // this rounds the current scale if it needs rounding
+            self.setScale(self.getScale());
+          });
         }).fail(function() {
           socket.reconnect();
         });
@@ -1576,21 +1586,22 @@ window.App = (function() {
       update: function(optional, ignoreCanvasLock = false) {
         self.pan.x = Math.min(self.width / 2, Math.max(-self.width / 2, self.pan.x));
         self.pan.y = Math.min(self.height / 2, Math.max(-self.height / 2, self.pan.y));
+        const scale = self.getScale();
         query.set({
           x: Math.round((self.width / 2) - self.pan.x),
           y: Math.round((self.height / 2) - self.pan.y),
-          scale: Math.round(self.scale * 100) / 100
+          scale: Math.round(scale * 100) / 100
         }, true);
         if (self.use_js_render) {
           const ctx2 = self.elements.board_render[0].getContext('2d');
-          let pxlX = -self.pan.x + ((self.width - (window.innerWidth / self.scale)) / 2);
-          let pxlY = -self.pan.y + ((self.height - (window.innerHeight / self.scale)) / 2);
+          let pxlX = -self.pan.x + ((self.width - (window.innerWidth / scale)) / 2);
+          let pxlY = -self.pan.y + ((self.height - (window.innerHeight / scale)) / 2);
           let dx = 0;
           let dy = 0;
           let dw = 0;
           let dh = 0;
-          let pxlW = window.innerWidth / self.scale;
-          let pxlH = window.innerHeight / self.scale;
+          let pxlW = window.innerWidth / scale;
+          let pxlH = window.innerHeight / scale;
 
           if (pxlX < 0) {
             dx = -pxlX;
@@ -1618,7 +1629,7 @@ window.App = (function() {
 
           ctx2.canvas.width = window.innerWidth;
           ctx2.canvas.height = window.innerHeight;
-          ctx2.mozImageSmoothingEnabled = ctx2.webkitImageSmoothingEnabled = ctx2.msImageSmoothingEnabled = ctx2.imageSmoothingEnabled = (Math.abs(self.scale) < 1);
+          ctx2.mozImageSmoothingEnabled = ctx2.webkitImageSmoothingEnabled = ctx2.msImageSmoothingEnabled = ctx2.imageSmoothingEnabled = (scale < 1);
 
           ctx2.globalAlpha = 1;
           ctx2.fillStyle = '#CCCCCC';
@@ -1628,10 +1639,10 @@ window.App = (function() {
             pxlY,
             pxlW,
             pxlH,
-            0 + (dx * self.scale),
-            0 + (dy * self.scale),
-            window.innerWidth - (dw * self.scale),
-            window.innerHeight - (dh * self.scale)
+            0 + (dx * scale),
+            0 + (dy * scale),
+            window.innerWidth - (dw * scale),
+            window.innerHeight - (dh * scale)
           );
 
           template.draw(ctx2, pxlX, pxlY);
@@ -1643,7 +1654,7 @@ window.App = (function() {
         if (optional) {
           return false;
         }
-        if (Math.abs(self.scale) < 1) {
+        if (scale < 1) {
           self.elements.board.removeClass('pixelate');
         } else {
           self.elements.board.addClass('pixelate');
@@ -1652,13 +1663,13 @@ window.App = (function() {
           self.elements.mover.css({
             width: self.width,
             height: self.height,
-            transform: 'translate(' + (self.scale <= 1 ? Math.round(self.pan.x) : self.pan.x) + 'px, ' + (self.scale <= 1 ? Math.round(self.pan.y) : self.pan.y) + 'px)'
+            transform: 'translate(' + (scale <= 1 ? Math.round(self.pan.x) : self.pan.x) + 'px, ' + (scale <= 1 ? Math.round(self.pan.y) : self.pan.y) + 'px)'
           });
         }
         if (self.use_zoom) {
-          self.elements.zoomer.css('zoom', (self.scale * 100).toString() + '%');
+          self.elements.zoomer.css('zoom', (scale * 100).toString() + '%');
         } else {
-          self.elements.zoomer.css('transform', 'scale(' + self.scale + ')');
+          self.elements.zoomer.css('transform', 'scale(' + scale + ')');
         }
 
         place.update();
@@ -1668,23 +1679,47 @@ window.App = (function() {
       getScale: function() {
         return Math.abs(self.scale);
       },
-      setScale: function(scale) {
+      setScale: function(scale, doUpdate = true) {
         if (settings.board.zoom.limit.enable.get() !== false && scale > 50) scale = 50;
-        else if (scale <= 0) scale = 0.5; // enforce the [0.5, 50] limit without blindly resetting to 0.5 when the user was trying to zoom in farther than 50x
+        else if (scale <= 0.01) scale = 0.01; // enforce the [0.01, 50] limit without blindly resetting to 0.01 when the user was trying to zoom in farther than 50x
+
+        if (settings.board.zoom.rounding.enable.get()) {
+          // We round up if zooming in and round down if zooming out to ensure that the level does change
+          // even if the scrolled amount wouldn't be closer to the next rounded value than the last one.
+          let round;
+          if (scale < self.scale) {
+            round = Math.floor;
+          } else {
+            round = Math.ceil;
+          }
+
+          if (scale > 1) {
+            if (self.scale < 1) {
+              scale = 1;
+            } else {
+              scale = round(scale);
+            }
+          } else {
+            if (self.scale > 1) {
+              scale = 1;
+            } else {
+              scale = 2 ** round(Math.log(scale) / Math.log(2));
+            }
+          }
+        }
+
         self.scale = scale;
-        self.update();
+        if (doUpdate) {
+          self.update();
+        }
       },
       getZoomBase: function() {
         return parseFloat(settings.board.zoom.sensitivity.get()) || 1.5;
       },
       nudgeScale: function(adj) {
-        const maxUnlocked = settings.board.zoom.limit.enable.get() === false;
-        const maximumValue = maxUnlocked ? Infinity : 50;
-        const minimumValue = maxUnlocked ? 0 : 0.5;
         const zoomBase = self.getZoomBase();
 
-        self.scale = Math.max(minimumValue, Math.min(maximumValue, self.scale * zoomBase ** adj));
-        self.update();
+        self.setScale(self.scale * zoomBase ** adj);
       },
       getPixel: function(x, y) {
         x = Math.floor(x);
@@ -1728,23 +1763,24 @@ window.App = (function() {
           adjustY = self.height;
         }
 
+        const scale = self.getScale();
         if (self.use_js_render) {
           toRet = {
-            x: -self.pan.x + ((self.width - (window.innerWidth / self.scale)) / 2) + (screenX / self.scale) + adjustX,
-            y: -self.pan.y + ((self.height - (window.innerHeight / self.scale)) / 2) + (screenY / self.scale) + adjustY
+            x: -self.pan.x + ((self.width - (window.innerWidth / scale)) / 2) + (screenX / scale) + adjustX,
+            y: -self.pan.y + ((self.height - (window.innerHeight / scale)) / 2) + (screenY / scale) + adjustY
           };
         } else {
           // we scope these into the `else` so that we don't have to redefine `boardBox` twice. getBoundingClientRect() forces a redraw so we don't want to do it every call either if we can help it.
           const boardBox = self.elements.board[0].getBoundingClientRect();
           if (self.use_zoom) {
             toRet = {
-              x: (screenX / self.scale) - boardBox.left + adjustX,
-              y: (screenY / self.scale) - boardBox.top + adjustY
+              x: (screenX / scale) - boardBox.left + adjustX,
+              y: (screenY / scale) - boardBox.top + adjustY
             };
           } else {
             toRet = {
-              x: ((screenX - boardBox.left) / self.scale) + adjustX,
-              y: ((screenY - boardBox.top) / self.scale) + adjustY
+              x: ((screenX - boardBox.left) / scale) + adjustX,
+              y: ((screenY - boardBox.top) / scale) + adjustY
             };
           }
         }
@@ -1757,26 +1793,27 @@ window.App = (function() {
         return toRet;
       },
       toScreen: function(boardX, boardY) {
-        if (self.scale < 0) {
+        const scale = self.getScale();
+        if (scale < 0) {
           boardX -= self.width - 1;
           boardY -= self.height - 1;
         }
         if (self.use_js_render) {
           return {
-            x: (boardX + self.pan.x - ((self.width - (window.innerWidth / self.scale)) / 2)) * self.scale,
-            y: (boardY + self.pan.y - ((self.height - (window.innerHeight / self.scale)) / 2)) * self.scale
+            x: (boardX + self.pan.x - ((self.width - (window.innerWidth / scale)) / 2)) * scale,
+            y: (boardY + self.pan.y - ((self.height - (window.innerHeight / scale)) / 2)) * scale
           };
         }
         const boardBox = self.elements.board[0].getBoundingClientRect();
         if (self.use_zoom) {
           return {
-            x: (boardX + boardBox.left) * self.scale,
-            y: (boardY + boardBox.top) * self.scale
+            x: (boardX + boardBox.left) * scale,
+            y: (boardY + boardBox.top) * scale
           };
         }
         return {
-          x: boardX * self.scale + boardBox.left,
-          y: boardY * self.scale + boardBox.top
+          x: boardX * scale + boardBox.left,
+          y: boardY * scale + boardBox.top
         };
       },
       save: function() {
@@ -2454,9 +2491,11 @@ window.App = (function() {
       update: function() {
         const a = board.fromScreen(0, 0, false);
         const scale = board.getScale();
+        const roundedScale = Math.max(1, Math.floor(scale));
+        const scaleRoundingErrorMultiplier = scale / roundedScale;
         self.elements.grid.css({
-          backgroundSize: scale + 'px ' + scale + 'px',
-          transform: 'translate(' + Math.floor(-a.x % 1 * scale) + 'px,' + Math.floor(-a.y % 1 * scale) + 'px)',
+          backgroundSize: roundedScale + 'px ' + roundedScale + 'px',
+          transform: 'translate(' + Math.floor(-a.x % 1 * roundedScale) + 'px,' + Math.floor(-a.y % 1 * roundedScale) + 'px) scale(' + scaleRoundingErrorMultiplier + ')',
           opacity: (scale - 2) / 6
         });
       }
@@ -4958,7 +4997,7 @@ window.App = (function() {
         board.centerOn(x, y);
 
         if (zoom) {
-          board.setScale(zoom);
+          board.setScale(zoom, true);
         }
       },
       _updateAuthorNameColor: (author, colorIdx) => {
@@ -5337,7 +5376,7 @@ window.App = (function() {
             crel('h2', { class: 'modal-title' }, 'Open Template'),
             crel(bodyWrapper,
               crel('h3', { class: 'text-orange' }, 'This link will overwrite your current template. What would you like to do?'),
-              Object.values(self.TEMPLATE_ACTIONS).map(action => action.id === 0 ? null
+              Object.values(self.TEMPLATE_ACTIONS).map(action => action.id === self.TEMPLATE_ACTIONS.ASK.id ? null
                 : crel('label', { style: 'display: block; margin: 3px 3px 3px 1rem; margin-left: 1rem;' },
                   crel('input', {
                     type: 'radio',
