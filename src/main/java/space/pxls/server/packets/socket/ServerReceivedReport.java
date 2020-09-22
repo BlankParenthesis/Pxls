@@ -1,15 +1,27 @@
 package space.pxls.server.packets.socket;
 
 public class ServerReceivedReport {
-    public static final String REPORT_TYPE_CHAT = "CHAT";
-    public static final String REPORT_TYPE_CANVAS = "CANVAS";
+    public final String type = "received_report";
+    public final Integer report_id;
+    public final Type report_type;
 
-    private Integer report_id;
-    private String type = "received_report";
-    private String report_type;
-
-    public ServerReceivedReport(Integer report_id, String report_type) {
+    public ServerReceivedReport(Integer report_id, Type report_type) {
         this.report_id = report_id;
         this.report_type = report_type;
+    }
+
+    public enum Type {
+        CHAT("CHAT"),
+        CANVAS("CANVAS");
+
+        private final String value;
+        Type(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return this.value;
+        }
     }
 }

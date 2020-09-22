@@ -10,16 +10,22 @@ public class ExtendedLookup extends Lookup {
         super(id, x, y, pixel_count, pixel_count_alltime, time, username, discordName, faction);
         this.login = login;
         this.userAgent = userAgent;
-
-        // override for staff
-        this.username = username;
-        this.discordName = discordName;
-        this.pixel_count = pixel_count;
-        this.pixel_count_alltime = pixel_count_alltime;
     }
 
     public static ExtendedLookup fromDB(DBPixelPlacement pixelPlacement) {
         if (pixelPlacement == null) return null;
-        return new ExtendedLookup(pixelPlacement.id, pixelPlacement.x, pixelPlacement.y, pixelPlacement.pixel_count, pixelPlacement.pixel_count_alltime, pixelPlacement.time, pixelPlacement.username, pixelPlacement.discordName, pixelPlacement.faction, pixelPlacement.login, pixelPlacement.userAgent);
+        return new ExtendedLookup(
+            pixelPlacement.id, 
+            pixelPlacement.x, 
+            pixelPlacement.y, 
+            pixelPlacement.pixel_count, 
+            pixelPlacement.pixel_count_alltime, 
+            pixelPlacement.time, 
+            pixelPlacement.username, 
+            pixelPlacement.discordName, 
+            pixelPlacement.faction, 
+            pixelPlacement.login, 
+            pixelPlacement.userAgent
+        );
     }
 }

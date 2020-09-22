@@ -4,31 +4,43 @@ import space.pxls.App;
 import space.pxls.data.DBPixelPlacementUser;
 
 public class Lookup {
-    public int id;
-    public int x;
-    public int y;
-    public int pixel_count;
-    public int pixel_count_alltime;
-    public long time;
-    public String username;
-    public String discordName = null;
-    public String faction;
+    public final int id;
+    public final int x;
+    public final int y;
+    public final int pixel_count;
+    public final int pixel_count_alltime;
+    public final long time;
+    public final String username;
+    public final String discordName;
+    public final String faction;
 
-    public Lookup(int id, int x, int y, int pixel_count, int pixel_count_alltime, long time, String username, String discordName, String faction) {
-        boolean isSnip = App.getConfig().getBoolean("oauth.snipMode");
+    protected Lookup(int id, int x, int y, int pixel_count, int pixel_count_alltime, long time, String username, String discordName, String faction) {
         this.id = id;
         this.x = x;
         this.y = y;
-        this.pixel_count = isSnip ? 0 : pixel_count;
-        this.pixel_count_alltime = isSnip ? 0 : pixel_count_alltime;
+        this.pixel_count = pixel_count;
+        this.pixel_count_alltime = pixel_count_alltime;
         this.time = time;
-        this.username = isSnip ? "-snip-" : username;
-        this.discordName = isSnip ? (discordName != null ? "-snip-" : null) : discordName; // if we're in snip mode, we want to filter the name, otherwise we'll just accept whatever was thrown at us. original serialization utilized nulls.
+        this.username = username;
+        this.discordName = discordName;
         this.faction = faction;
     }
 
     public static Lookup fromDB(DBPixelPlacementUser pixelPlacementUser) {
         if (pixelPlacementUser == null) return null;
-        return new Lookup(pixelPlacementUser.id, pixelPlacementUser.x, pixelPlacementUser.y, pixelPlacementUser.pixel_count, pixelPlacementUser.pixel_count_alltime, pixelPlacementUser.time, pixelPlacementUser.username, pixelPlacementUser.discordName, pixelPlacementUser.faction);
+        boolean isSnip = App.getConfig().getBoolean("oauth.snipMode");
+        return new Lookup(
+            pixelPlacementUser.id, 
+            pixelPlacementUser.x, 
+            pixelPlacementUser.y, 
+            isSnip ? 0 : pixelPlacementUser.pixel_count, 
+            isSnip ? 0 : pixelPlacementUser.pixel_count_alltime, 
+            pixelPlacementUser.time, 
+            isSnip ? "-snip-" : pixelPlacementUser.username, 
+            // NOTE ([  ]): The following line will leak information in snip mode about whether or not the user has discord linked. 
+            //              It's not the place of this changeset to deal with that, but I'd rather note that than let it get lost.
+            isSnip ? (pixelPlacementUser.discordName != null ? "-snip-" : null) : pixelPlacementUser.discordName,  // if we're in snip mode, we want to filter the name, otherwise we'll just accept whatever was thrown at us. original serialization utilized nulls.
+            pixelPlacementUser.faction
+        );
     }
 }

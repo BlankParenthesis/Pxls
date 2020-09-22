@@ -5,35 +5,33 @@ import space.pxls.data.DBFactionSearch;
 import space.pxls.user.Faction;
 
 public class UserFaction {
-    public int id;
-    public int color;
-    public String name;
-    public String tag;
-    public String owner;
-    public String canvasCode;
-    public long creation_ms;
-    public Integer memberCount;
-    public Boolean userJoined;
+    public final int id;
+    public final int color;
+    public final String name;
+    public final String tag;
+    public final String owner;
+    public final String canvasCode;
+    public final long creation_ms;
+    public final Integer memberCount;
+    public final Boolean userJoined;
 
     public UserFaction(DBFaction faction) {
-        _scaffold(new Faction(faction));
-        this.memberCount = null;
-        this.userJoined = null;
+        this(new Faction(faction), null, null);
     }
 
     public UserFaction(DBFactionSearch dbFactionSearch) {
-        _scaffold(new Faction(dbFactionSearch));
-        this.memberCount = dbFactionSearch.memberCount;
-        this.userJoined = dbFactionSearch.userJoined;
+        this(
+            new Faction(dbFactionSearch), 
+            dbFactionSearch.memberCount, 
+            dbFactionSearch.userJoined
+        );
     }
 
     public UserFaction(Faction faction) {
-        _scaffold(faction);
-        this.memberCount = null;
-        this.userJoined = null;
+        this(faction, null, null);
     }
 
-    private void _scaffold(Faction faction) {
+    private UserFaction(Faction faction, Integer memberCount, Boolean userJoined) {
         this.id = faction.getId();
         this.color = faction.getColor();
         this.name = faction.getName();
@@ -41,5 +39,7 @@ public class UserFaction {
         this.owner = faction.fetchOwner().getName();
         this.creation_ms = faction.getCreated().toInstant().toEpochMilli();
         this.canvasCode = faction.getCanvasCode();
+        this.memberCount = memberCount;
+        this.userJoined = userJoined;
     }
 }

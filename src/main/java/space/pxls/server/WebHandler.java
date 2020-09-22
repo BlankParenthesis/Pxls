@@ -791,7 +791,7 @@ public class WebHandler {
         if (_reportMessage.length() > 2048) _reportMessage = _reportMessage.substring(0, 2048);
         Integer rid = App.getDatabase().insertChatReport(chatMessage.id, chatMessage.author_uid, user.getId(), _reportMessage);
         if (rid != null)
-            App.getServer().broadcastToStaff(new ServerReceivedReport(rid, ServerReceivedReport.REPORT_TYPE_CHAT));
+            App.getServer().broadcastToStaff(new ServerReceivedReport(rid, ServerReceivedReport.Type.CANVAS));
 
         send(200, exchange, null);
     }
@@ -1797,7 +1797,7 @@ public class WebHandler {
         }
         Integer rid = App.getDatabase().insertReport(user.getId(), pxl.userId, id, x, y, msgq.getValue());
         if (rid != null)
-            App.getServer().broadcastToStaff(new ServerReceivedReport(rid, ServerReceivedReport.REPORT_TYPE_CANVAS));
+            App.getServer().broadcastToStaff(new ServerReceivedReport(rid, ServerReceivedReport.Type.CANVAS));
         exchange.setStatusCode(200);
     }
 

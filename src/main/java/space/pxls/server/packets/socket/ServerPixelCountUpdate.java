@@ -4,9 +4,8 @@ import space.pxls.user.User;
 
 public class ServerPixelCountUpdate {
 	public final String type = "pixelCounts";
-
-	public Integer pixelCount;
-	public Integer pixelCountAllTime;
+	public final Integer pixelCount;
+	public final Integer pixelCountAllTime;
 
 	public ServerPixelCountUpdate(Integer pixelCount, Integer pixelCountAllTime) {
 		this.pixelCount = pixelCount;

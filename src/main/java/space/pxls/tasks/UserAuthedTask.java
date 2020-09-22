@@ -42,7 +42,7 @@ public class UserAuthedTask implements Runnable {
                 }
                 Integer rid = App.getDatabase().insertServerReport(user.getId(), toReport.toString());
                 if (rid != null)
-                    App.getServer().broadcastToStaff(new ServerReceivedReport(rid, ServerReceivedReport.REPORT_TYPE_CANVAS));
+                    App.getServer().broadcastToStaff(new ServerReceivedReport(rid, ServerReceivedReport.Type.CANVAS));
                 App.getDatabase().setLastIPAlertFlag(user.getId(), true);
             }
         }
