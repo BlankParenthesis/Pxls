@@ -1,4 +1,6 @@
-package space.pxls.server.packets.chat;
+package space.pxls.server.packets.socket;
+
+import space.pxls.user.ChatMessage;
 
 import java.util.List;
 

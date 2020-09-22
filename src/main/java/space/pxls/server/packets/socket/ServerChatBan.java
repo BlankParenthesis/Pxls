@@ -1,4 +1,4 @@
-package space.pxls.server.packets.chat;
+package space.pxls.server.packets.socket;
 
 public class ServerChatBan {
     public final String type = "chat_ban";

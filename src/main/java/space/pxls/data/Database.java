@@ -6,13 +6,8 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.customizer.BindList;
 import space.pxls.App;
-import space.pxls.server.packets.chat.Badge;
-import space.pxls.server.packets.chat.ChatMessage;
-import space.pxls.server.packets.chat.ServerChatLookup;
-import space.pxls.user.Chatban;
-import space.pxls.user.Faction;
-import space.pxls.user.Role;
-import space.pxls.user.User;
+import space.pxls.server.packets.socket.ServerChatLookup;
+import space.pxls.user.*;
 
 import java.sql.Array;
 import java.sql.ResultSet;

@@ -12,8 +12,6 @@ import space.pxls.data.DBPixelPlacement;
 import space.pxls.data.DBRollbackPixel;
 import space.pxls.data.Database;
 import space.pxls.server.UndertowServer;
-import space.pxls.server.packets.chat.Badge;
-import space.pxls.server.packets.chat.ClientChatMessage;
 import space.pxls.server.packets.socket.*;
 import space.pxls.user.*;
 import space.pxls.util.*;

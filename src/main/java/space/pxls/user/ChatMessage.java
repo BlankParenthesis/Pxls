@@ -1,6 +1,5 @@
-package space.pxls.server.packets.chat;
+package space.pxls.user;
 
-import space.pxls.user.Faction;
 import space.pxls.App;
 
 import java.util.List;

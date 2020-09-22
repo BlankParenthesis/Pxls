@@ -1,4 +1,4 @@
-package space.pxls.server.packets.chat;
+package space.pxls.server.packets.socket;
 
 public class ServerACKClientUpdate {
     public final String type = "ack_client_update";

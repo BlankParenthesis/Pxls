@@ -2,7 +2,6 @@ package space.pxls.user;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
-import space.pxls.server.packets.chat.Badge;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

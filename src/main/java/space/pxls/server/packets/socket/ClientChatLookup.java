@@ -1,4 +1,4 @@
-package space.pxls.server.packets.chat;
+package space.pxls.server.packets.socket;
 
 public class ClientChatLookup {
     public final String arg;

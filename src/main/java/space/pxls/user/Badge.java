@@ -1,4 +1,4 @@
-package space.pxls.server.packets.chat;
+package space.pxls.user;
 
 public class Badge {
     public String displayName;

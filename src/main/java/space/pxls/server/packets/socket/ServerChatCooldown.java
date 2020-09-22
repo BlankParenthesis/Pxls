@@ -1,4 +1,4 @@
-package space.pxls.server.packets.chat;
+package space.pxls.server.packets.socket;
 
 public class ServerChatCooldown {
     public final String type = "message_cooldown";
