@@ -219,9 +219,6 @@ public class PacketHandler {
     }
 
     private void handlePlace(WebSocketChannel channel, User user, ClientPlace cp, String ip) {
-        if (!cp.type.equals("pixel")) {
-            handlePlaceMaybe(channel, user, cp, ip);
-        }
         if (cp.x < 0 || cp.y >= App.getWidth() || cp.y < 0 || cp.y >= App.getHeight()) return;
         if (cp.color < 0 || cp.color >= App.getConfig().getStringList("board.palette").size()) return;
         if (user.isBanned()) return;
@@ -324,9 +321,6 @@ public class PacketHandler {
                 }
             }
         }
-    }
-
-    private void handlePlaceMaybe(WebSocketChannel channel, User user, ClientPlace cp, String ip) {
     }
 
     private void handleCaptcha(WebSocketChannel channel, User user, ClientCaptcha cc) {

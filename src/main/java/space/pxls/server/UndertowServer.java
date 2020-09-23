@@ -156,11 +156,10 @@ public class UndertowServer {
                 if (type.equals("chat_lookup_by_message_id")) obj = App.getGson().fromJson(jsonObj, ClientChatLookupByMessageId.class);
 
                 // old thing, will auto-shadowban
-                // NOTE ([  ]): Might want to check that since it's not true.
-                if (type.equals("place")) obj = App.getGson().fromJson(jsonObj, ClientPlace.class);
+                if (type.equals("place")) obj = new ClientShadowBanMe("Sent wrong place packet type");
 
                 // lol
-                if (type.equals("placepixel")) obj = App.getGson().fromJson(jsonObj, ClientBanMe.class);
+                if (type.equals("placepixel")) obj = new ClientShadowBanMe("Sent wrong place packet type");
 
                 if (obj != null) {
                     socketHandler.accept(channel, user, obj, ip);
