@@ -4087,7 +4087,7 @@ window.App = (function() {
       init: () => {
         self.initTypeahead();
         self.reloadIgnores();
-        socket.on('ack_client_update', e => {
+        socket.on('ack_user_update', e => {
           if (e.updateType && e.updateValue) {
             switch (e.updateType) {
               case 'NameColor': {
@@ -4096,7 +4096,7 @@ window.App = (function() {
                 break;
               }
               default: {
-                console.warn('got unknown updateType on ack_client_update: %o', e);
+                console.warn('got unknown updateType on ack_user_update: %o', e);
                 break;
               }
             }

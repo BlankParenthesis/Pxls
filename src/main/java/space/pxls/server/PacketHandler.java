@@ -372,20 +372,20 @@ public class PacketHandler {
                 int t = Integer.parseInt(nameColor);
                 if (t >= -2 && t < App.getConfig().getStringList("board.palette").size()) {
                     if (t == -1 && !user.hasPermission("chat.usercolor.rainbow")) {
-                        server.send(channel, new ServerACKClientUpdate(false, "Color reserved for staff members", "NameColor", null));
+                        server.send(channel, new ServerACKUserUpdate(false, "Color reserved for staff members", "NameColor", null));
                     }
                     if (t == -2 && !user.hasPermission("chat.usercolor.donator")) {
-                        server.send(channel, new ServerACKClientUpdate(false, "Color reserved for donators", "NameColor", null));
+                        server.send(channel, new ServerACKUserUpdate(false, "Color reserved for donators", "NameColor", null));
                         return;
                     }
                     user.setChatNameColor(t, true);
-                    server.send(channel, new ServerACKClientUpdate(true, null, "NameColor", String.valueOf(t)));
+                    server.send(channel, new ServerACKUserUpdate(true, null, "NameColor", String.valueOf(t)));
                     toBroadcast.put("NameColor", String.valueOf(t));
                 } else {
-                    server.send(channel, new ServerACKClientUpdate(false, "Color index out of bounds", "NameColor", null));
+                    server.send(channel, new ServerACKUserUpdate(false, "Color index out of bounds", "NameColor", null));
                 }
             } catch (NumberFormatException nfe) {
-                server.send(channel, new ServerACKClientUpdate(false, "Invalid color index", "NameColor", null));
+                server.send(channel, new ServerACKUserUpdate(false, "Invalid color index", "NameColor", null));
             }
         }
 
