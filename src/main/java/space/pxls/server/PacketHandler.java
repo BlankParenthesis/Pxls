@@ -115,7 +115,8 @@ public class PacketHandler {
         if (obj instanceof ClientChatbanState) handleChatbanState(channel, user, ((ClientChatbanState) obj));
         if (obj instanceof ClientChatMessage && user.hasPermission("chat.send")) handleChatMessage(channel, user, ((ClientChatMessage) obj));
         if (obj instanceof ClientUserUpdate) handleClientUserUpdate(channel, user, ((ClientUserUpdate) obj));
-        if (obj instanceof ClientChatLookup && user.hasPermission("chat.lookup")) handleChatLookup(channel, user, ((ClientChatLookup) obj));
+        if (obj instanceof ClientChatLookupByUsername && user.hasPermission("chat.lookup")) handleChatLookupByUsername(channel, user, ((ClientChatLookupByUsername) obj));
+        if (obj instanceof ClientChatLookupByMessageId && user.hasPermission("chat.lookup")) handleChatLookupByMessageId(channel, user, ((ClientChatLookupByMessageId) obj));
         if (obj instanceof ClientAdminCooldownOverride && user.hasPermission("board.cooldown.override")) handleCooldownOverride(channel, user, ((ClientAdminCooldownOverride) obj));
         if (obj instanceof ClientAdminMessage && user.hasPermission("user.alert")) handleAdminMessage(channel, user, ((ClientAdminMessage) obj));
     }
@@ -131,25 +132,24 @@ public class PacketHandler {
         }
     }
 
-    private void handleChatLookup(WebSocketChannel channel, User user, ClientChatLookup obj) {
-        ServerChatLookup scl;
-        String username = obj.arg;
-        if (obj.mode.equalsIgnoreCase("cmid")) {
-            Integer i = null;
-            try {
-                i = Integer.parseInt(obj.arg);
-            } catch (NumberFormatException nfe) {
-                server.send(channel, new ServerError("Invalid message ID supplied"));
-            }
-            if (i != null) {
-                DBChatMessage chatMessage = App.getDatabase().getChatMessageByID(i);
-                if (chatMessage != null) {
-                    User fromChatMessage = App.getUserManager().getByID(chatMessage.author_uid);
-                    username = fromChatMessage != null ? fromChatMessage.getName() : null;
-                }
+    private void handleChatLookupByMessageId(WebSocketChannel channel, User user, ClientChatLookupByMessageId obj) {
+        String username = null;
+        if (obj.messageId != null) {
+            DBChatMessage chatMessage = App.getDatabase().getChatMessageByID(obj.messageId);
+            if (chatMessage != null) {
+                User fromChatMessage = App.getUserManager().getByID(chatMessage.author_uid);
+                username = fromChatMessage != null ? fromChatMessage.getName() : null;
             }
         }
-        scl = username != null ? App.getDatabase().runChatLookupForUsername(username, App.getConfig().getInt("chat.chatLookupScrollbackAmount")) : null;
+        handleChatLookup(channel, user, username);
+    }
+
+    private void handleChatLookupByUsername(WebSocketChannel channel, User user, ClientChatLookupByUsername obj) {
+        handleChatLookup(channel, user, obj.username);
+    }
+
+    private void handleChatLookup(WebSocketChannel channel, User user, String username) {
+        ServerChatLookup scl = username != null ? App.getDatabase().runChatLookupForUsername(username, App.getConfig().getInt("chat.chatLookupScrollbackAmount")) : null;
         server.send(channel, scl == null ? new ServerError("User doesn't exist") : scl);
     }
 
@@ -496,16 +496,14 @@ public class PacketHandler {
     }
 
     private void ackUndo(User user, int x, int y) {
-        ack(user, "UNDO", x, y);
+        for (WebSocketChannel ch : user.getConnections()) {
+            server.send(ch, new ServerACKUndo(x, y));
+        }
     }
 
     private void ackPlace(User user, int x, int y) {
-        ack(user, "PLACE", x, y);
-    }
-
-    private void ack(User user, String _for, int x, int y) {
         for (WebSocketChannel ch : user.getConnections()) {
-            server.send(ch, new ServerACK(_for, x, y));
+            server.send(ch, new ServerACKPlace(x, y));
         }
     }
 

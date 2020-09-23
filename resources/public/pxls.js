@@ -2848,22 +2848,19 @@ window.App = (function() {
           board.refresh();
           board.update(true);
         });
-        socket.on('ACK', function(data) {
-          switch (data.ackFor) {
-            case 'PLACE':
-              $(window).trigger('pxls:ack:place', [data.x, data.y]);
-              if (uiHelper.tabHasFocus() && settings.audio.enable.get()) {
-                const clone = self.audio.cloneNode(false);
-                clone.volume = parseFloat(settings.audio.alert.volume.get());
-                clone.play();
-              }
-              break;
-            case 'UNDO':
-              $(window).trigger('pxls:ack:undo', [data.x, data.y]);
-              break;
+        socket.on('ack_place', function(data) {
+          $(window).trigger('pxls:ack:place', [data.x, data.y]);
+          if (uiHelper.tabHasFocus() && settings.audio.enable.get()) {
+            const clone = self.audio.cloneNode(false);
+            clone.volume = parseFloat(settings.audio.alert.volume.get());
+            clone.play();
           }
 
-          if (uiHelper.getAvailable() === 0) { uiHelper.setPlaceableText(data.ackFor === 'PLACE' ? 0 : 1); }
+          if (uiHelper.getAvailable() === 0) { uiHelper.setPlaceableText(0); }
+        });
+        socket.on('ack_undo', function(data) {
+          $(window).trigger('pxls:ack:undo', [data.x, data.y]);
+          if (uiHelper.getAvailable() === 0) { uiHelper.setPlaceableText(1); }
         });
         socket.on('captcha_required', function(data) {
           if (!self.isDoingCaptcha) {
@@ -6030,11 +6027,17 @@ window.App = (function() {
             break;
           }
           case 'lookup-chat': {
-            socket.send({
-              type: 'ChatLookup',
-              arg: board.snipMode ? this.dataset.id : reportingTarget,
-              mode: board.snipMode ? 'cmid' : 'username'
-            });
+            if (board.snipMode) {
+              socket.send({
+                type: 'ChatLookupByMessageId',
+                messageId: this.dataset.id
+              });
+            } else {
+              socket.send({
+                type: 'ChatLookupByUsername',
+                username: reportingTarget
+              });
+            }
             break;
           }
           case 'request-rename': {
