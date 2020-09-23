@@ -12,7 +12,8 @@ import space.pxls.data.DBPixelPlacement;
 import space.pxls.data.DBRollbackPixel;
 import space.pxls.data.Database;
 import space.pxls.server.UndertowServer;
-import space.pxls.server.packets.socket.*;
+import space.pxls.server.packets.socket.server.*;
+import space.pxls.server.packets.socket.client.*;
 import space.pxls.user.*;
 import space.pxls.util.*;
 
@@ -134,7 +135,7 @@ public class App {
                 }
             }
         } catch (Exception e) {
-            getLogger().error(new Error("Failed to create backup directories", e));
+            getLogger().error(new java.lang.Error("Failed to create backup directories", e));
         }
         saveMap();
     }
@@ -246,7 +247,7 @@ public class App {
                 var rest = Arrays.copyOfRange(token, 1, token.length);
                 String message = String.join(" ", rest);
                 App.getDatabase().insertServerAdminLog(String.format("Sent a server-wide broadcast with the content: %s", message));
-                server.broadcast(new ServerAlert("console", message));
+                server.broadcast(new Alert("console", message));
             } else if (token[0].equalsIgnoreCase("ban")) {
                 if (token.length < 2) {
                     System.out.println("Usage: ban <username> [reason]");
@@ -402,7 +403,7 @@ public class App {
             } else if (token[0].equalsIgnoreCase("broadcast")) {
                 //broadcast MESSAGE
                 if (token.length > 1) {
-                    App.getServer().getPacketHandler().handleChatMessage(null, null, new ClientSendChatMessage(line.substring(token[0].length() + 1)));
+                    App.getServer().getPacketHandler().handleChatMessage(null, null, new SendChatMessage(line.substring(token[0].length() + 1)));
                 }
             } else if (token[0].equalsIgnoreCase("ChatBan")) {
                 if (token.length > 4) {
@@ -501,7 +502,7 @@ public class App {
                     if (toRename != null) {
                         toRename.setRenameRequested(false);
                         if (toRename.updateUsername(token[2], true)) {
-                            App.getServer().send(toRename, new ServerNotifyRename(toRename.getName()));
+                            App.getServer().send(toRename, new NotifyRename(toRename.getName()));
                             System.out.println("Name updated");
                         } else {
                             System.out.println("Failed to update name (function returned false. name taken or an error occurred)");
@@ -542,7 +543,7 @@ public class App {
                 String body = token[3];
 
                 int id = App.getDatabase().createNotification(-1, title, body, expiry);
-                App.getServer().broadcast(new ServerNotification(App.getDatabase().getNotification(id)));
+                App.getServer().broadcast(new Notification(App.getDatabase().getNotification(id)));
                 System.out.println("Notification sent");
             } else if (token[0].equalsIgnoreCase("bp")) {
                 if (token.length == 1) {
@@ -636,7 +637,7 @@ public class App {
         config = ConfigFactory.parseFile(new File("pxls.conf")).withFallback(ConfigFactory.load());
         config.checkValid(ConfigFactory.load());
 
-        RateLimitFactory.registerBucketHolder(ClientUndo.class, new RateLimitFactory.BucketConfig(((int) App.getConfig().getDuration("server.limits.undo.time", TimeUnit.SECONDS)), App.getConfig().getInt("server.limits.undo.count")));
+        RateLimitFactory.registerBucketHolder(Undo.class, new RateLimitFactory.BucketConfig(((int) App.getConfig().getDuration("server.limits.undo.time", TimeUnit.SECONDS)), App.getConfig().getInt("server.limits.undo.count")));
         RateLimitFactory.registerBucketHolder(DBChatMessage.class, new RateLimitFactory.BucketConfig(((int) App.getConfig().getDuration("server.limits.chat.time", TimeUnit.SECONDS)), App.getConfig().getInt("server.limits.chat.count")));
         RateLimitFactory.registerBucketHolder("http:discordName", new RateLimitFactory.BucketConfig((int) App.getConfig().getDuration("server.limits.discordNameChange.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.discordNameChange.count")));
 
@@ -818,7 +819,7 @@ public class App {
 
     private static void rollbackAfterBan_(User who, int seconds) {
         List<DBRollbackPixel> pixels = database.getRollbackPixels(who, seconds); //get all pixels that can and need to be rolled back
-        List<ServerNotifyPlace.Pixel> forBroadcast = new ArrayList<>();
+        List<NotifyPlace.Pixel> forBroadcast = new ArrayList<>();
         for (DBRollbackPixel rbPixel : pixels) {
             //This is same for both instances
             //  putPixel() logs and updates the board[]
@@ -826,17 +827,17 @@ public class App {
             //  putRollbackPixel() adds rollback pixel to database (TABLE pixels) for undo and timelapse purposes
             if (rbPixel.toPixel != null) { //if previous pixel (the one we are rolling back to) exists
                 putPixel(rbPixel.toPixel.x, rbPixel.toPixel.y, rbPixel.toPixel.color, who, false, "", false, "rollback");
-                forBroadcast.add(new ServerNotifyPlace.Pixel(rbPixel.toPixel.x, rbPixel.toPixel.y, rbPixel.toPixel.color));
+                forBroadcast.add(new NotifyPlace.Pixel(rbPixel.toPixel.x, rbPixel.toPixel.y, rbPixel.toPixel.color));
                 database.putRollbackPixel(who, rbPixel.fromId, rbPixel.toPixel.id);
             } else { //else rollback to blank canvas
                 DBPixelPlacement fromPixel = database.getPixelByID(null, rbPixel.fromId);
                 byte rollbackDefault = getDefaultColor(fromPixel.x, fromPixel.y);
                 putPixel(fromPixel.x, fromPixel.y, rollbackDefault, who, false, "", false, "rollback");
-                forBroadcast.add(new ServerNotifyPlace.Pixel(fromPixel.x, fromPixel.y, (int) rollbackDefault));
+                forBroadcast.add(new NotifyPlace.Pixel(fromPixel.x, fromPixel.y, (int) rollbackDefault));
                 database.putRollbackPixelNoPrevious(fromPixel.x, fromPixel.y, who, fromPixel.id);
             }
         }
-        server.broadcastNoShadow(new ServerNotifyPlace(forBroadcast));
+        server.broadcastNoShadow(new NotifyPlace(forBroadcast));
     }
 
 
@@ -847,14 +848,14 @@ public class App {
 
     private static void undoRollback_(User who) {
         List<DBPixelPlacement> pixels = database.getUndoPixels(who); //get all pixels that can and need to be undone
-        List<ServerNotifyPlace.Pixel> forBroadcast = new ArrayList<>();
+        List<NotifyPlace.Pixel> forBroadcast = new ArrayList<>();
         for (DBPixelPlacement fromPixel : pixels) {
             //restores original pixel
             putPixel(fromPixel.x, fromPixel.y, fromPixel.color, who, false, "", false, "rollback undo"); //in board[]
-            forBroadcast.add(new ServerNotifyPlace.Pixel(fromPixel.x, fromPixel.y, fromPixel.color)); //in websocket
+            forBroadcast.add(new NotifyPlace.Pixel(fromPixel.x, fromPixel.y, fromPixel.color)); //in websocket
             database.putUndoPixel(fromPixel.x, fromPixel.y, fromPixel.color, who, fromPixel.id); //in database
         }
-        server.broadcastNoShadow(new ServerNotifyPlace(forBroadcast));
+        server.broadcastNoShadow(new NotifyPlace(forBroadcast));
     }
 
     private static void nuke(int fromX, int fromY, int toX, int toY, byte fromColor, byte toColor) {
@@ -863,7 +864,7 @@ public class App {
     }
 
     private static void nuke_(int fromX, int fromY, int toX, int toY, byte fromColor, byte toColor) {
-        List<ServerNotifyPlace.Pixel> forBroadcast = new ArrayList<>();
+        List<NotifyPlace.Pixel> forBroadcast = new ArrayList<>();
         for (int x = Math.min(fromX, toX); x <= Math.max(fromX, toX); x++) {
             for (int y = Math.min(fromY, toY); y <= Math.max(fromY, toY); y++) {
                 byte c = toColor;
@@ -874,7 +875,7 @@ public class App {
                 // fromColor is 0xFF or -1 if we're nuking
                 if (pixelColor != toColor) {
                     putPixel(x, y, c, null, true, "", false, "console nuke");
-                    forBroadcast.add(new ServerNotifyPlace.Pixel(x, y, (int) c));
+                    forBroadcast.add(new NotifyPlace.Pixel(x, y, (int) c));
                     if (fromColor == 0xFF || fromColor == -1) {
                         database.putNukePixel(x, y, c);
                     } else if (pixelColor == fromColor) {
@@ -883,7 +884,7 @@ public class App {
                 }
             }
         }
-        server.broadcastNoShadow(new ServerNotifyPlace(forBroadcast));
+        server.broadcastNoShadow(new NotifyPlace(forBroadcast));
     }
 
     private static boolean loadMap() {

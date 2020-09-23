@@ -15,7 +15,7 @@ import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.core.WebSockets;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import space.pxls.App;
-import space.pxls.server.packets.socket.*;
+import space.pxls.server.packets.socket.client.*;
 import space.pxls.tasks.UserAuthedTask;
 import space.pxls.user.User;
 import space.pxls.util.*;
@@ -141,25 +141,25 @@ public class UndertowServer {
                 String type = jsonObj.get("type").getAsString();
 
                 Object obj = null;
-                if (type.equals("pixel")) obj = App.getGson().fromJson(jsonObj, ClientPlace.class);
-                if (type.equals("undo")) obj = App.getGson().fromJson(jsonObj, ClientUndo.class);
-                if (type.equals("captcha")) obj = App.getGson().fromJson(jsonObj, ClientCompleteCaptcha.class);
-                if (type.equals("admin_cdoverride")) obj = App.getGson().fromJson(jsonObj, ClientSetAdminCooldownOverride.class);
-                if (type.equals("admin_message")) obj = App.getGson().fromJson(jsonObj, ClientSendAdminMessage.class);
-                if (type.equals("shadowbanme")) obj = App.getGson().fromJson(jsonObj, ClientShadowBanMe.class);
-                if (type.equals("banme")) obj = App.getGson().fromJson(jsonObj, ClientBanMe.class);
-                if (type.equals("chat_history")) obj = App.getGson().fromJson(jsonObj, ClientGetChatHistory.class);
-                if (type.equals("chat_ban_state")) obj = App.getGson().fromJson(jsonObj, ClientGetChatbanState.class);
-                if (type.equals("chat_message")) obj = App.getGson().fromJson(jsonObj, ClientSendChatMessage.class);
-                if (type.equals("user_update")) obj = App.getGson().fromJson(jsonObj, ClientUpdateUser.class);
-                if (type.equals("chat_lookup_by_username")) obj = App.getGson().fromJson(jsonObj, ClientChatLookupByUsername.class);
-                if (type.equals("chat_lookup_by_message_id")) obj = App.getGson().fromJson(jsonObj, ClientChatLookupByMessageId.class);
+                if (type.equals("pixel")) obj = App.getGson().fromJson(jsonObj, Place.class);
+                if (type.equals("undo")) obj = App.getGson().fromJson(jsonObj, Undo.class);
+                if (type.equals("captcha")) obj = App.getGson().fromJson(jsonObj, CompleteCaptcha.class);
+                if (type.equals("admin_cdoverride")) obj = App.getGson().fromJson(jsonObj, SetAdminCooldownOverride.class);
+                if (type.equals("admin_message")) obj = App.getGson().fromJson(jsonObj, SendAdminMessage.class);
+                if (type.equals("shadowbanme")) obj = App.getGson().fromJson(jsonObj, ShadowBanMe.class);
+                if (type.equals("banme")) obj = App.getGson().fromJson(jsonObj, BanMe.class);
+                if (type.equals("chat_history")) obj = App.getGson().fromJson(jsonObj, GetChatHistory.class);
+                if (type.equals("chat_ban_state")) obj = App.getGson().fromJson(jsonObj, GetChatbanState.class);
+                if (type.equals("chat_message")) obj = App.getGson().fromJson(jsonObj, SendChatMessage.class);
+                if (type.equals("user_update")) obj = App.getGson().fromJson(jsonObj, UpdateUser.class);
+                if (type.equals("chat_lookup_by_username")) obj = App.getGson().fromJson(jsonObj, ChatLookupByUsername.class);
+                if (type.equals("chat_lookup_by_message_id")) obj = App.getGson().fromJson(jsonObj, ChatLookupByMessageId.class);
 
                 // old thing, will auto-shadowban
-                if (type.equals("place")) obj = new ClientShadowBanMe("Sent wrong place packet type");
+                if (type.equals("place")) obj = new ShadowBanMe("Sent wrong place packet type");
 
                 // lol
-                if (type.equals("placepixel")) obj = new ClientShadowBanMe("Sent wrong place packet type");
+                if (type.equals("placepixel")) obj = new ShadowBanMe("Sent wrong place packet type");
 
                 if (obj != null) {
                     socketHandler.accept(channel, user, obj, ip);

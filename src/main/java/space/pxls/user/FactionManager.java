@@ -4,8 +4,8 @@ import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
 import space.pxls.App;
 import space.pxls.data.DBFaction;
-import space.pxls.server.packets.socket.*;
-import space.pxls.server.packets.http.UserFaction;
+import space.pxls.server.packets.socket.server.*;
+import space.pxls.server.packets.http.server.UserFaction;
 
 import java.util.Optional;
 
@@ -78,7 +78,7 @@ public class FactionManager {
     public void deleteByID(int fid) {
         invalidate(fid);
         App.getDatabase().deleteFactionByFID(fid);
-        App.getServer().broadcast(new ServerNotifyFactionClear(fid));
+        App.getServer().broadcast(new NotifyFactionClear(fid));
     }
 
     /**
@@ -121,7 +121,7 @@ public class FactionManager {
                 App.getDatabase().updateFaction(faction);
                 faction.setDirty(false);
             }
-            App.getServer().broadcast(new ServerNotifyFactionUpdate(new UserFaction(faction)));
+            App.getServer().broadcast(new NotifyFactionUpdate(new UserFaction(faction)));
         }
     }
 

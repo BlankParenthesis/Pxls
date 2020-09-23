@@ -4,7 +4,8 @@ import io.undertow.websockets.core.WebSocketChannel;
 import space.pxls.App;
 import space.pxls.data.DBUser;
 import space.pxls.data.DBUserPixelCounts;
-import space.pxls.server.packets.socket.*;
+import space.pxls.server.packets.socket.client.*;
+import space.pxls.server.packets.socket.server.*;
 import space.pxls.util.RateLimitFactory;
 
 import java.sql.Timestamp;
@@ -114,7 +115,7 @@ public class User {
     }
     public boolean canUndo(boolean hitBucket) {
         if (!hasPermission("board.undo")) return false;
-        int rem = RateLimitFactory.getTimeRemaining(ClientUndo.class, String.valueOf(this.id), hitBucket);
+        int rem = RateLimitFactory.getTimeRemaining(Undo.class, String.valueOf(this.id), hitBucket);
         return rem == 0;
     }
 
@@ -379,14 +380,14 @@ public class User {
                 this.isPermaChatbanned = false;
                 this.chatbanExpiryTime = chatban.expiryTimeMS;
                 this.chatbanReason = chatban.reason;
-                App.getServer().getPacketHandler().sendChatban(this, new ServerNotifyChatBan(false, chatban.reason, chatban.expiryTimeMS));
+                App.getServer().getPacketHandler().sendChatban(this, new NotifyChatBan(false, chatban.reason, chatban.expiryTimeMS));
                 App.getDatabase().updateChatBanReason(getId(), chatban.reason);
                 break;
             }
             case PERMA: {
                 this.isPermaChatbanned = true;
                 this.chatbanReason = chatban.reason;
-                App.getServer().getPacketHandler().sendChatban(this, new ServerNotifyChatBan(true, chatban.reason, null));
+                App.getServer().getPacketHandler().sendChatban(this, new NotifyChatBan(true, chatban.reason, null));
                 App.getDatabase().updateChatBanReason(getId(), chatban.reason);
                 break;
             }
@@ -394,7 +395,7 @@ public class User {
                 this.isPermaChatbanned = false;
                 this.chatbanExpiryTime = chatban.expiryTimeMS;
                 this.chatbanReason = chatban.reason;
-                App.getServer().getPacketHandler().sendChatban(this, new ServerNotifyChatBan(false, chatban.reason, 0L));
+                App.getServer().getPacketHandler().sendChatban(this, new NotifyChatBan(false, chatban.reason, 0L));
                 break;
             }
         }
@@ -576,7 +577,7 @@ public class User {
     public void setRenameRequested(boolean isRequested) {
         this.isRenameRequested = isRequested;
         App.getDatabase().setRenameRequested(id, isRequested);
-        App.getServer().send(this, new ServerNotifyRenameRequested(isRequested));
+        App.getServer().send(this, new NotifyRenameRequested(isRequested));
     }
 
     public boolean isRenameRequested(boolean reloadFromDatabase) {
@@ -732,7 +733,7 @@ public class User {
             App.getDatabase().setDisplayedFactionForUID(id, displayedFaction);
         }
         if (broadcast) {
-            App.getServer().broadcast(new ServerNotifyChatUserUpdate(getName(), new HashMap<String, Object>() {{put("DisplayedFaction", (displayedFaction == null || displayedFaction == 0) ? "" : fetchDisplayedFaction());}}));
+            App.getServer().broadcast(new NotifyChatUserUpdate(getName(), new HashMap<String, Object>() {{put("DisplayedFaction", (displayedFaction == null || displayedFaction == 0) ? "" : fetchDisplayedFaction());}}));
         }
     }
 

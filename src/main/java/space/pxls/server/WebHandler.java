@@ -15,9 +15,9 @@ import io.undertow.util.*;
 import space.pxls.App;
 import space.pxls.auth.*;
 import space.pxls.data.*;
-import space.pxls.server.packets.http.Error;
-import space.pxls.server.packets.http.*;
-import space.pxls.server.packets.socket.*;
+import space.pxls.server.packets.http.server.*;
+import space.pxls.server.packets.socket.server.*;
+import space.pxls.server.packets.socket.server.Notification;
 import space.pxls.user.*;
 import space.pxls.util.*;
 
@@ -791,7 +791,7 @@ public class WebHandler {
         if (_reportMessage.length() > 2048) _reportMessage = _reportMessage.substring(0, 2048);
         Integer rid = App.getDatabase().insertChatReport(chatMessage.id, chatMessage.author_uid, user.getId(), _reportMessage);
         if (rid != null)
-            App.getServer().broadcastToStaff(new ServerNotifyReceivedReport(rid, ServerNotifyReceivedReport.Type.CANVAS));
+            App.getServer().broadcastToStaff(new NotifyReceivedReport(rid, NotifyReceivedReport.Type.CANVAS));
 
         send(200, exchange, null);
     }
@@ -1044,7 +1044,7 @@ public class WebHandler {
         if (toUpdate.updateUsername(newName, true)) {
             App.getDatabase().insertAdminLog(user.getId(), String.format("Changed %s's name to %s (uid: %d)", oldName, newName, toUpdate.getId()));
             toUpdate.setRenameRequested(false);
-            App.getServer().send(toUpdate, new ServerNotifyRename(toUpdate.getName()));
+            App.getServer().send(toUpdate, new NotifyRename(toUpdate.getName()));
             exchange.setStatusCode(200);
             exchange.getResponseSender().send("{}");
             exchange.endExchange();
@@ -1078,7 +1078,7 @@ public class WebHandler {
         if (user.updateUsername(newName)) {
             App.getDatabase().insertServerReport(user.getId(), String.format("User %s just changed their name to %s.", oldName, user.getName()));
             user.setRenameRequested(false);
-            App.getServer().send(user, new ServerNotifyRename(user.getName()));
+            App.getServer().send(user, new NotifyRename(user.getName()));
             exchange.setStatusCode(200);
             exchange.getResponseSender().send("{}");
             exchange.endExchange();
@@ -1243,7 +1243,7 @@ public class WebHandler {
         }
         try {
             int notifID = App.getDatabase().createNotification(user.getId(), title, body, Instant.ofEpochMilli(expiry).getEpochSecond());
-            App.getServer().broadcast(new ServerNotification(App.getDatabase().getNotification(notifID))); //re-fetch to ensure we're returning exact time and expiry 'n whatnot from the database.
+            App.getServer().broadcast(new Notification(App.getDatabase().getNotification(notifID))); //re-fetch to ensure we're returning exact time and expiry 'n whatnot from the database.
         } catch (Exception e) {
             e.printStackTrace();
             send(StatusCodes.INTERNAL_SERVER_ERROR, exchange, "Failed to create notification");
@@ -1419,7 +1419,7 @@ public class WebHandler {
             if (user != null) {
                 exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
                 exchange.getResponseSender().send(App.getGson().toJson(
-                    new ServerNotifyUserInfo(
+                    new NotifyUserInfo(
                         user.getName(),
                         user.getLogin(),
                         user.getAllRoles(),
@@ -1446,30 +1446,30 @@ public class WebHandler {
 
     public void signUp(HttpServerExchange exchange) {
         if (!App.getRegistrationEnabled()) {
-            respond(exchange, StatusCodes.UNAUTHORIZED, new space.pxls.server.packets.http.Error("registration_disabled", "Registration has been disabled"));
+            respond(exchange, StatusCodes.UNAUTHORIZED, new space.pxls.server.packets.http.server.Error("registration_disabled", "Registration has been disabled"));
             return;
         }
         FormData data = exchange.getAttachment(FormDataParser.FORM_DATA);
         FormData.FormValue nameVal = data.getFirst("username");
         FormData.FormValue tokenVal = data.getFirst("token");
         if (nameVal == null || tokenVal == null) {
-            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.Error("bad_params", "Missing parameters"));
+            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.server.Error("bad_params", "Missing parameters"));
             return;
         }
 
         String name = nameVal.getValue();
         String token = tokenVal.getValue();
         if (token.isEmpty()) {
-            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.Error("bad_token", "Missing signup token"));
+            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.server.Error("bad_token", "Missing signup token"));
             return;
         } else if (name.isEmpty()) {
-            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.Error("bad_username", "Username may not be empty"));
+            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.server.Error("bad_username", "Username may not be empty"));
             return;
         } else if (!name.matches("[a-zA-Z0-9_\\-]+")) {
-            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.Error("bad_username", "Username contains invalid characters"));
+            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.server.Error("bad_username", "Username contains invalid characters"));
             return;
         } else if (!App.getUserManager().isValidSignupToken(token)) {
-            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.Error("bad_token", "Invalid signup token"));
+            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.server.Error("bad_token", "Invalid signup token"));
             return;
         }
 
@@ -1477,7 +1477,7 @@ public class WebHandler {
         User user = App.getUserManager().signUp(name, token, ip);
 
         if (user == null) {
-            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.Error("bad_username", "Username taken, try another?"));
+            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.server.Error("bad_username", "Username taken, try another?"));
             return;
         }
 
@@ -1543,13 +1543,13 @@ public class WebHandler {
                 if (redirect) {
                     redirect(exchange, "/auth_done.html?nologin=1");
                 } else {
-                    respond(exchange, StatusCodes.UNAUTHORIZED, new space.pxls.server.packets.http.Error("oauth_error", error));
+                    respond(exchange, StatusCodes.UNAUTHORIZED, new space.pxls.server.packets.http.server.Error("oauth_error", error));
                 }
                 return;
             }
 
             if (!service.verifyState(state)) {
-                respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.Error("bad_state", "Invalid state token"));
+                respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.server.Error("bad_state", "Invalid state token"));
                 return;
             }
 
@@ -1559,7 +1559,7 @@ public class WebHandler {
                 if (redirect) {
                     redirect(exchange, "/auth_done.html?nologin=1");
                 } else {
-                    respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.Error("bad_code", "No OAuth code specified"));
+                    respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.server.Error("bad_code", "No OAuth code specified"));
                 }
                 return;
             }
@@ -1567,7 +1567,7 @@ public class WebHandler {
             // Get a more persistent user token
             String token = service.getToken(code);
             if (token == null) {
-                respond(exchange, StatusCodes.UNAUTHORIZED, new space.pxls.server.packets.http.Error("bad_code", "OAuth code invalid"));
+                respond(exchange, StatusCodes.UNAUTHORIZED, new space.pxls.server.packets.http.server.Error("bad_code", "OAuth code invalid"));
                 return;
             }
 
@@ -1576,7 +1576,7 @@ public class WebHandler {
             try {
                 identifier = service.getIdentifier(token);
             } catch (AuthService.InvalidAccountException e) {
-                respond(exchange, StatusCodes.UNAUTHORIZED, new space.pxls.server.packets.http.Error("invalid_account", e.getMessage()));
+                respond(exchange, StatusCodes.UNAUTHORIZED, new space.pxls.server.packets.http.server.Error("invalid_account", e.getMessage()));
                 return;
             }
 
@@ -1593,7 +1593,7 @@ public class WebHandler {
                             respond(exchange, StatusCodes.OK, new AuthResponse(signUpToken, true));
                         }
                     } else {
-                        respond(exchange, StatusCodes.UNAUTHORIZED, new space.pxls.server.packets.http.Error("invalid_service_operation", "Registration is currently disabled for this service. Please try one of the other ones."));
+                        respond(exchange, StatusCodes.UNAUTHORIZED, new space.pxls.server.packets.http.server.Error("invalid_service_operation", "Registration is currently disabled for this service. Please try one of the other ones."));
                     }
                 } else {
                     // We need the IP for logging/db purposes
@@ -1607,10 +1607,10 @@ public class WebHandler {
                     }
                 }
             } else {
-                respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.Error("bad_service", "No auth service named " + id));
+                respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.server.Error("bad_service", "No auth service named " + id));
             }
         } else {
-            respond(exchange, StatusCodes.BAD_REQUEST, new Error("bad_service", "No auth service named " + id));
+            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.server.Error("bad_service", "No auth service named " + id));
         }
     }
 
@@ -1641,7 +1641,7 @@ public class WebHandler {
                 respond(exchange, StatusCodes.OK, new SignInResponse(service.getRedirectUrl(state + "|json")));
             }
         } else {
-            respond(exchange, StatusCodes.BAD_REQUEST, new Error("bad_service", "No auth method named " + id));
+            respond(exchange, StatusCodes.BAD_REQUEST, new space.pxls.server.packets.http.server.Error("bad_service", "No auth method named " + id));
         }
     }
 
@@ -1797,7 +1797,7 @@ public class WebHandler {
         }
         Integer rid = App.getDatabase().insertReport(user.getId(), pxl.userId, id, x, y, msgq.getValue());
         if (rid != null)
-            App.getServer().broadcastToStaff(new ServerNotifyReceivedReport(rid, ServerNotifyReceivedReport.Type.CANVAS));
+            App.getServer().broadcastToStaff(new NotifyReceivedReport(rid, NotifyReceivedReport.Type.CANVAS));
         exchange.setStatusCode(200);
     }
 
@@ -1805,7 +1805,7 @@ public class WebHandler {
         exchange.getResponseHeaders()
                 .put(Headers.CONTENT_TYPE, "application/json")
                 .put(HttpString.tryFromString("Access-Control-Allow-Origin"), "*");
-        exchange.getResponseSender().send(App.getGson().toJson(new ServerNotifyUserCount(App.getServer().getNonIdledUsersCount())));
+        exchange.getResponseSender().send(App.getGson().toJson(new NotifyUserCount(App.getServer().getNonIdledUsersCount())));
     }
 
     public void whoami(HttpServerExchange exchange) {
