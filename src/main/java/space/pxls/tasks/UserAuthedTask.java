@@ -2,7 +2,7 @@ package space.pxls.tasks;
 
 import io.undertow.websockets.core.WebSocketChannel;
 import space.pxls.App;
-import space.pxls.server.packets.socket.ServerReceivedReport;
+import space.pxls.server.packets.socket.ServerNotifyReceivedReport;
 import space.pxls.user.User;
 
 import java.util.List;
@@ -42,7 +42,7 @@ public class UserAuthedTask implements Runnable {
                 }
                 Integer rid = App.getDatabase().insertServerReport(user.getId(), toReport.toString());
                 if (rid != null)
-                    App.getServer().broadcastToStaff(new ServerReceivedReport(rid, ServerReceivedReport.Type.CANVAS));
+                    App.getServer().broadcastToStaff(new ServerNotifyReceivedReport(rid, ServerNotifyReceivedReport.Type.CANVAS));
                 App.getDatabase().setLastIPAlertFlag(user.getId(), true);
             }
         }

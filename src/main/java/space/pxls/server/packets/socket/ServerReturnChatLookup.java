@@ -6,13 +6,13 @@ import space.pxls.data.DBUser;
 
 import java.util.List;
 
-public class ServerChatLookup {
+public class ServerReturnChatLookup {
     public final String type = "chat_lookup";
     public final DBUser target;
     public final List<DBChatMessage> history;
     public final List<DBExtendedChatban> chatbans;
 
-    public ServerChatLookup(DBUser target, List<DBChatMessage> history, List<DBExtendedChatban> chatbans) {
+    public ServerReturnChatLookup(DBUser target, List<DBChatMessage> history, List<DBExtendedChatban> chatbans) {
         this.target = target;
         this.history = history;
         this.chatbans = chatbans;

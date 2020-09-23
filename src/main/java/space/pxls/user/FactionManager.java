@@ -78,7 +78,7 @@ public class FactionManager {
     public void deleteByID(int fid) {
         invalidate(fid);
         App.getDatabase().deleteFactionByFID(fid);
-        App.getServer().broadcast(new ServerFactionClear(fid));
+        App.getServer().broadcast(new ServerNotifyFactionClear(fid));
     }
 
     /**
@@ -121,7 +121,7 @@ public class FactionManager {
                 App.getDatabase().updateFaction(faction);
                 faction.setDirty(false);
             }
-            App.getServer().broadcast(new ServerFactionUpdate(new UserFaction(faction)));
+            App.getServer().broadcast(new ServerNotifyFactionUpdate(new UserFaction(faction)));
         }
     }
 

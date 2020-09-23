@@ -1,5 +1,5 @@
 package space.pxls.server.packets.socket;
 
-public class ServerCaptchaRequired {
+public class ServerNotifyCaptchaRequired {
     public final String type = "captcha_required";
 }

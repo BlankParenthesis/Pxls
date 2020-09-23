@@ -2,11 +2,11 @@ package space.pxls.server.packets.socket;
 
 import java.util.Collection;
 
-public class ServerPlace {
+public class ServerNotifyPlace {
     public final String type = "pixel";
     public final Collection<Pixel> pixels;
 
-    public ServerPlace(Collection<Pixel> pixels) {
+    public ServerNotifyPlace(Collection<Pixel> pixels) {
         this.pixels = pixels;
     }
 

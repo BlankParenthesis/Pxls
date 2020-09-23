@@ -1,10 +1,10 @@
 package space.pxls.server.packets.socket;
 
-public class ServerUsers {
+public class ServerNotifyUserCount {
     public final String type = "users";
     public final Integer count;
 
-    public ServerUsers(Integer count) {
+    public ServerNotifyUserCount(Integer count) {
         this.count = count;
     }
 }

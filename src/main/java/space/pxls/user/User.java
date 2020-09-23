@@ -379,14 +379,14 @@ public class User {
                 this.isPermaChatbanned = false;
                 this.chatbanExpiryTime = chatban.expiryTimeMS;
                 this.chatbanReason = chatban.reason;
-                App.getServer().getPacketHandler().sendChatban(this, new ServerChatBan(false, chatban.reason, chatban.expiryTimeMS));
+                App.getServer().getPacketHandler().sendChatban(this, new ServerNotifyChatBan(false, chatban.reason, chatban.expiryTimeMS));
                 App.getDatabase().updateChatBanReason(getId(), chatban.reason);
                 break;
             }
             case PERMA: {
                 this.isPermaChatbanned = true;
                 this.chatbanReason = chatban.reason;
-                App.getServer().getPacketHandler().sendChatban(this, new ServerChatBan(true, chatban.reason, null));
+                App.getServer().getPacketHandler().sendChatban(this, new ServerNotifyChatBan(true, chatban.reason, null));
                 App.getDatabase().updateChatBanReason(getId(), chatban.reason);
                 break;
             }
@@ -394,7 +394,7 @@ public class User {
                 this.isPermaChatbanned = false;
                 this.chatbanExpiryTime = chatban.expiryTimeMS;
                 this.chatbanReason = chatban.reason;
-                App.getServer().getPacketHandler().sendChatban(this, new ServerChatBan(false, chatban.reason, 0L));
+                App.getServer().getPacketHandler().sendChatban(this, new ServerNotifyChatBan(false, chatban.reason, 0L));
                 break;
             }
         }
@@ -576,7 +576,7 @@ public class User {
     public void setRenameRequested(boolean isRequested) {
         this.isRenameRequested = isRequested;
         App.getDatabase().setRenameRequested(id, isRequested);
-        App.getServer().send(this, new ServerRename(isRequested));
+        App.getServer().send(this, new ServerNotifyRenameRequested(isRequested));
     }
 
     public boolean isRenameRequested(boolean reloadFromDatabase) {
@@ -732,7 +732,7 @@ public class User {
             App.getDatabase().setDisplayedFactionForUID(id, displayedFaction);
         }
         if (broadcast) {
-            App.getServer().broadcast(new ServerChatUserUpdate(getName(), new HashMap<String, Object>() {{put("DisplayedFaction", (displayedFaction == null || displayedFaction == 0) ? "" : fetchDisplayedFaction());}}));
+            App.getServer().broadcast(new ServerNotifyChatUserUpdate(getName(), new HashMap<String, Object>() {{put("DisplayedFaction", (displayedFaction == null || displayedFaction == 0) ? "" : fetchDisplayedFaction());}}));
         }
     }
 

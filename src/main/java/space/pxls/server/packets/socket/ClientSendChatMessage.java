@@ -1,9 +1,9 @@
 package space.pxls.server.packets.socket;
 
-public class ClientChatMessage {
+public class ClientSendChatMessage {
     public final String message;
 
-    public ClientChatMessage(String message) {
+    public ClientSendChatMessage(String message) {
         this.message = message;
     }
 }

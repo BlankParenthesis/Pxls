@@ -6,7 +6,7 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.customizer.BindList;
 import space.pxls.App;
-import space.pxls.server.packets.socket.ServerChatLookup;
+import space.pxls.server.packets.socket.ServerReturnChatLookup;
 import space.pxls.user.*;
 
 import java.sql.Array;
@@ -1411,7 +1411,7 @@ public class Database {
      * @param history_limit The maximum number of chat message history to fetch.
      * @return The requested user's last 100 messages and chatbans.
      */
-    public ServerChatLookup runChatLookupForUsername(String username, int history_limit) {
+    public ServerReturnChatLookup runChatLookupForUsername(String username, int history_limit) {
         // we want to run all these queries with their own handle so we don't hit the pool x times.
         return jdbi.withHandle(handle -> {
             Optional<DBUser> dbu = handle.createQuery(SQL_USER_BY_NAME)
@@ -1432,7 +1432,7 @@ public class Database {
                     .map(new DBChatMessage.Mapper())
                     .list();
 
-            return new ServerChatLookup(dbUser, messages, chatbans);
+            return new ServerReturnChatLookup(dbUser, messages, chatbans);
         });
     }
 

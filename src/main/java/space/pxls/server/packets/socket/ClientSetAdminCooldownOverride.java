@@ -1,9 +1,9 @@
 package space.pxls.server.packets.socket;
 
-public class ClientAdminCooldownOverride {
+public class ClientSetAdminCooldownOverride {
     public final Boolean override;
 
-    public ClientAdminCooldownOverride(Boolean override) {
+    public ClientSetAdminCooldownOverride(Boolean override) {
         this.override = override;
     }
 }

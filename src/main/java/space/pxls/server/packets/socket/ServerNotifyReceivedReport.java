@@ -1,11 +1,11 @@
 package space.pxls.server.packets.socket;
 
-public class ServerReceivedReport {
+public class ServerNotifyReceivedReport {
     public final String type = "received_report";
     public final Integer reportId;
     public final Type reportType;
 
-    public ServerReceivedReport(Integer reportId, Type reportType) {
+    public ServerNotifyReceivedReport(Integer reportId, Type reportType) {
         this.reportId = reportId;
         this.reportType = reportType;
     }

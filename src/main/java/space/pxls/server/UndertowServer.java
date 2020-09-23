@@ -143,15 +143,15 @@ public class UndertowServer {
                 Object obj = null;
                 if (type.equals("pixel")) obj = App.getGson().fromJson(jsonObj, ClientPlace.class);
                 if (type.equals("undo")) obj = App.getGson().fromJson(jsonObj, ClientUndo.class);
-                if (type.equals("captcha")) obj = App.getGson().fromJson(jsonObj, ClientCaptcha.class);
-                if (type.equals("admin_cdoverride")) obj = App.getGson().fromJson(jsonObj, ClientAdminCooldownOverride.class);
-                if (type.equals("admin_message")) obj = App.getGson().fromJson(jsonObj, ClientAdminMessage.class);
+                if (type.equals("captcha")) obj = App.getGson().fromJson(jsonObj, ClientCompleteCaptcha.class);
+                if (type.equals("admin_cdoverride")) obj = App.getGson().fromJson(jsonObj, ClientSetAdminCooldownOverride.class);
+                if (type.equals("admin_message")) obj = App.getGson().fromJson(jsonObj, ClientSendAdminMessage.class);
                 if (type.equals("shadowbanme")) obj = App.getGson().fromJson(jsonObj, ClientShadowBanMe.class);
                 if (type.equals("banme")) obj = App.getGson().fromJson(jsonObj, ClientBanMe.class);
-                if (type.equals("chat_history")) obj = App.getGson().fromJson(jsonObj, ClientChatHistory.class);
-                if (type.equals("chat_ban_state")) obj = App.getGson().fromJson(jsonObj, ClientChatbanState.class);
-                if (type.equals("chat_message")) obj = App.getGson().fromJson(jsonObj, ClientChatMessage.class);
-                if (type.equals("user_update")) obj = App.getGson().fromJson(jsonObj, ClientUserUpdate.class);
+                if (type.equals("chat_history")) obj = App.getGson().fromJson(jsonObj, ClientGetChatHistory.class);
+                if (type.equals("chat_ban_state")) obj = App.getGson().fromJson(jsonObj, ClientGetChatbanState.class);
+                if (type.equals("chat_message")) obj = App.getGson().fromJson(jsonObj, ClientSendChatMessage.class);
+                if (type.equals("user_update")) obj = App.getGson().fromJson(jsonObj, ClientUpdateUser.class);
                 if (type.equals("chat_lookup_by_username")) obj = App.getGson().fromJson(jsonObj, ClientChatLookupByUsername.class);
                 if (type.equals("chat_lookup_by_message_id")) obj = App.getGson().fromJson(jsonObj, ClientChatLookupByMessageId.class);
 

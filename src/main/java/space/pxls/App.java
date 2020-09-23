@@ -402,7 +402,7 @@ public class App {
             } else if (token[0].equalsIgnoreCase("broadcast")) {
                 //broadcast MESSAGE
                 if (token.length > 1) {
-                    App.getServer().getPacketHandler().handleChatMessage(null, null, new ClientChatMessage(line.substring(token[0].length() + 1)));
+                    App.getServer().getPacketHandler().handleChatMessage(null, null, new ClientSendChatMessage(line.substring(token[0].length() + 1)));
                 }
             } else if (token[0].equalsIgnoreCase("ChatBan")) {
                 if (token.length > 4) {
@@ -501,7 +501,7 @@ public class App {
                     if (toRename != null) {
                         toRename.setRenameRequested(false);
                         if (toRename.updateUsername(token[2], true)) {
-                            App.getServer().send(toRename, new ServerRenameSuccess(toRename.getName()));
+                            App.getServer().send(toRename, new ServerNotifyRename(toRename.getName()));
                             System.out.println("Name updated");
                         } else {
                             System.out.println("Failed to update name (function returned false. name taken or an error occurred)");
@@ -818,7 +818,7 @@ public class App {
 
     private static void rollbackAfterBan_(User who, int seconds) {
         List<DBRollbackPixel> pixels = database.getRollbackPixels(who, seconds); //get all pixels that can and need to be rolled back
-        List<ServerPlace.Pixel> forBroadcast = new ArrayList<>();
+        List<ServerNotifyPlace.Pixel> forBroadcast = new ArrayList<>();
         for (DBRollbackPixel rbPixel : pixels) {
             //This is same for both instances
             //  putPixel() logs and updates the board[]
@@ -826,17 +826,17 @@ public class App {
             //  putRollbackPixel() adds rollback pixel to database (TABLE pixels) for undo and timelapse purposes
             if (rbPixel.toPixel != null) { //if previous pixel (the one we are rolling back to) exists
                 putPixel(rbPixel.toPixel.x, rbPixel.toPixel.y, rbPixel.toPixel.color, who, false, "", false, "rollback");
-                forBroadcast.add(new ServerPlace.Pixel(rbPixel.toPixel.x, rbPixel.toPixel.y, rbPixel.toPixel.color));
+                forBroadcast.add(new ServerNotifyPlace.Pixel(rbPixel.toPixel.x, rbPixel.toPixel.y, rbPixel.toPixel.color));
                 database.putRollbackPixel(who, rbPixel.fromId, rbPixel.toPixel.id);
             } else { //else rollback to blank canvas
                 DBPixelPlacement fromPixel = database.getPixelByID(null, rbPixel.fromId);
                 byte rollbackDefault = getDefaultColor(fromPixel.x, fromPixel.y);
                 putPixel(fromPixel.x, fromPixel.y, rollbackDefault, who, false, "", false, "rollback");
-                forBroadcast.add(new ServerPlace.Pixel(fromPixel.x, fromPixel.y, (int) rollbackDefault));
+                forBroadcast.add(new ServerNotifyPlace.Pixel(fromPixel.x, fromPixel.y, (int) rollbackDefault));
                 database.putRollbackPixelNoPrevious(fromPixel.x, fromPixel.y, who, fromPixel.id);
             }
         }
-        server.broadcastNoShadow(new ServerPlace(forBroadcast));
+        server.broadcastNoShadow(new ServerNotifyPlace(forBroadcast));
     }
 
 
@@ -847,14 +847,14 @@ public class App {
 
     private static void undoRollback_(User who) {
         List<DBPixelPlacement> pixels = database.getUndoPixels(who); //get all pixels that can and need to be undone
-        List<ServerPlace.Pixel> forBroadcast = new ArrayList<>();
+        List<ServerNotifyPlace.Pixel> forBroadcast = new ArrayList<>();
         for (DBPixelPlacement fromPixel : pixels) {
             //restores original pixel
             putPixel(fromPixel.x, fromPixel.y, fromPixel.color, who, false, "", false, "rollback undo"); //in board[]
-            forBroadcast.add(new ServerPlace.Pixel(fromPixel.x, fromPixel.y, fromPixel.color)); //in websocket
+            forBroadcast.add(new ServerNotifyPlace.Pixel(fromPixel.x, fromPixel.y, fromPixel.color)); //in websocket
             database.putUndoPixel(fromPixel.x, fromPixel.y, fromPixel.color, who, fromPixel.id); //in database
         }
-        server.broadcastNoShadow(new ServerPlace(forBroadcast));
+        server.broadcastNoShadow(new ServerNotifyPlace(forBroadcast));
     }
 
     private static void nuke(int fromX, int fromY, int toX, int toY, byte fromColor, byte toColor) {
@@ -863,7 +863,7 @@ public class App {
     }
 
     private static void nuke_(int fromX, int fromY, int toX, int toY, byte fromColor, byte toColor) {
-        List<ServerPlace.Pixel> forBroadcast = new ArrayList<>();
+        List<ServerNotifyPlace.Pixel> forBroadcast = new ArrayList<>();
         for (int x = Math.min(fromX, toX); x <= Math.max(fromX, toX); x++) {
             for (int y = Math.min(fromY, toY); y <= Math.max(fromY, toY); y++) {
                 byte c = toColor;
@@ -874,7 +874,7 @@ public class App {
                 // fromColor is 0xFF or -1 if we're nuking
                 if (pixelColor != toColor) {
                     putPixel(x, y, c, null, true, "", false, "console nuke");
-                    forBroadcast.add(new ServerPlace.Pixel(x, y, (int) c));
+                    forBroadcast.add(new ServerNotifyPlace.Pixel(x, y, (int) c));
                     if (fromColor == 0xFF || fromColor == -1) {
                         database.putNukePixel(x, y, c);
                     } else if (pixelColor == fromColor) {
@@ -883,7 +883,7 @@ public class App {
                 }
             }
         }
-        server.broadcastNoShadow(new ServerPlace(forBroadcast));
+        server.broadcastNoShadow(new ServerNotifyPlace(forBroadcast));
     }
 
     private static boolean loadMap() {

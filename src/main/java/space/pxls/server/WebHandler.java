@@ -791,7 +791,7 @@ public class WebHandler {
         if (_reportMessage.length() > 2048) _reportMessage = _reportMessage.substring(0, 2048);
         Integer rid = App.getDatabase().insertChatReport(chatMessage.id, chatMessage.author_uid, user.getId(), _reportMessage);
         if (rid != null)
-            App.getServer().broadcastToStaff(new ServerReceivedReport(rid, ServerReceivedReport.Type.CANVAS));
+            App.getServer().broadcastToStaff(new ServerNotifyReceivedReport(rid, ServerNotifyReceivedReport.Type.CANVAS));
 
         send(200, exchange, null);
     }
@@ -1044,7 +1044,7 @@ public class WebHandler {
         if (toUpdate.updateUsername(newName, true)) {
             App.getDatabase().insertAdminLog(user.getId(), String.format("Changed %s's name to %s (uid: %d)", oldName, newName, toUpdate.getId()));
             toUpdate.setRenameRequested(false);
-            App.getServer().send(toUpdate, new ServerRenameSuccess(toUpdate.getName()));
+            App.getServer().send(toUpdate, new ServerNotifyRename(toUpdate.getName()));
             exchange.setStatusCode(200);
             exchange.getResponseSender().send("{}");
             exchange.endExchange();
@@ -1078,7 +1078,7 @@ public class WebHandler {
         if (user.updateUsername(newName)) {
             App.getDatabase().insertServerReport(user.getId(), String.format("User %s just changed their name to %s.", oldName, user.getName()));
             user.setRenameRequested(false);
-            App.getServer().send(user, new ServerRenameSuccess(user.getName()));
+            App.getServer().send(user, new ServerNotifyRename(user.getName()));
             exchange.setStatusCode(200);
             exchange.getResponseSender().send("{}");
             exchange.endExchange();
@@ -1419,7 +1419,7 @@ public class WebHandler {
             if (user != null) {
                 exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
                 exchange.getResponseSender().send(App.getGson().toJson(
-                    new ServerUserInfo(
+                    new ServerNotifyUserInfo(
                         user.getName(),
                         user.getLogin(),
                         user.getAllRoles(),
@@ -1797,7 +1797,7 @@ public class WebHandler {
         }
         Integer rid = App.getDatabase().insertReport(user.getId(), pxl.userId, id, x, y, msgq.getValue());
         if (rid != null)
-            App.getServer().broadcastToStaff(new ServerReceivedReport(rid, ServerReceivedReport.Type.CANVAS));
+            App.getServer().broadcastToStaff(new ServerNotifyReceivedReport(rid, ServerNotifyReceivedReport.Type.CANVAS));
         exchange.setStatusCode(200);
     }
 
@@ -1805,7 +1805,7 @@ public class WebHandler {
         exchange.getResponseHeaders()
                 .put(Headers.CONTENT_TYPE, "application/json")
                 .put(HttpString.tryFromString("Access-Control-Allow-Origin"), "*");
-        exchange.getResponseSender().send(App.getGson().toJson(new ServerUsers(App.getServer().getNonIdledUsersCount())));
+        exchange.getResponseSender().send(App.getGson().toJson(new ServerNotifyUserCount(App.getServer().getNonIdledUsersCount())));
     }
 
     public void whoami(HttpServerExchange exchange) {

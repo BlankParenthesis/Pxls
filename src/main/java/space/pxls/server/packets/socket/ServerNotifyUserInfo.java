@@ -4,7 +4,7 @@ import space.pxls.user.Role;
 
 import java.util.List;
 
-public class ServerUserInfo {
+public class ServerNotifyUserInfo {
     public final String type = "userinfo";
     public final String username;
     public final String login;
@@ -24,10 +24,10 @@ public class ServerUserInfo {
     public final String discordName;
     public final Number chatNameColor;
 
-    public ServerUserInfo(String username, String login, List<Role> roles, int pixelCount, int pixelCountAllTime,
-                          Boolean banned, Long banExpiry, String banReason, String method, Boolean cdOverride,
-                          Boolean chatBanned, String chatbanReason, Boolean chatbanIsPerma, Long chatbanExpiry,
-                          Boolean renameRequested, String discordName, Number chatNameColor) {
+    public ServerNotifyUserInfo(String username, String login, List<Role> roles, int pixelCount, int pixelCountAllTime,
+                                Boolean banned, Long banExpiry, String banReason, String method, Boolean cdOverride,
+                                Boolean chatBanned, String chatbanReason, Boolean chatbanIsPerma, Long chatbanExpiry,
+                                Boolean renameRequested, String discordName, Number chatNameColor) {
         this.username = username;
         this.login = login;
         this.roles = roles;
