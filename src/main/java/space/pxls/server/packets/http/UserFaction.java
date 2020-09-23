@@ -11,7 +11,7 @@ public class UserFaction {
     public final String tag;
     public final String owner;
     public final String canvasCode;
-    public final long creation_ms;
+    public final long creationMs;
     public final Integer memberCount;
     public final Boolean userJoined;
 
@@ -37,7 +37,7 @@ public class UserFaction {
         this.name = faction.getName();
         this.tag = faction.getTag();
         this.owner = faction.fetchOwner().getName();
-        this.creation_ms = faction.getCreated().toInstant().toEpochMilli();
+        this.creationMs = faction.getCreated().toInstant().toEpochMilli();
         this.canvasCode = faction.getCanvasCode();
         this.memberCount = memberCount;
         this.userJoined = userJoined;

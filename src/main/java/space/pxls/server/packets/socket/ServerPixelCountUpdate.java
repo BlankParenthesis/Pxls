@@ -3,7 +3,7 @@ package space.pxls.server.packets.socket;
 import space.pxls.user.User;
 
 public class ServerPixelCountUpdate {
-	public final String type = "pixelCounts";
+	public final String type = "pixel_counts";
 	public final Integer pixelCount;
 	public final Integer pixelCountAllTime;
 

@@ -148,14 +148,15 @@ public class UndertowServer {
                 if (type.equals("admin_message")) obj = App.getGson().fromJson(jsonObj, ClientAdminMessage.class);
                 if (type.equals("shadowbanme")) obj = App.getGson().fromJson(jsonObj, ClientShadowBanMe.class);
                 if (type.equals("banme")) obj = App.getGson().fromJson(jsonObj, ClientBanMe.class);
-                if (type.equalsIgnoreCase("ChatHistory")) obj = App.getGson().fromJson(jsonObj, ClientChatHistory.class);
-                if (type.equalsIgnoreCase("ChatbanState")) obj = App.getGson().fromJson(jsonObj, ClientChatbanState.class);
-                if (type.equalsIgnoreCase("ChatMessage")) obj = App.getGson().fromJson(jsonObj, ClientChatMessage.class);
-                if (type.equalsIgnoreCase("UserUpdate")) obj = App.getGson().fromJson(jsonObj, ClientUserUpdate.class);
-                if (type.equalsIgnoreCase("ChatLookupByUsername")) obj = App.getGson().fromJson(jsonObj, ClientChatLookupByUsername.class);
-                if (type.equalsIgnoreCase("ChatLookupByMessageId")) obj = App.getGson().fromJson(jsonObj, ClientChatLookupByMessageId.class);
+                if (type.equals("chat_history")) obj = App.getGson().fromJson(jsonObj, ClientChatHistory.class);
+                if (type.equals("chat_ban_state")) obj = App.getGson().fromJson(jsonObj, ClientChatbanState.class);
+                if (type.equals("chat_message")) obj = App.getGson().fromJson(jsonObj, ClientChatMessage.class);
+                if (type.equals("user_update")) obj = App.getGson().fromJson(jsonObj, ClientUserUpdate.class);
+                if (type.equals("chat_lookup_by_username")) obj = App.getGson().fromJson(jsonObj, ClientChatLookupByUsername.class);
+                if (type.equals("chat_lookup_by_message_id")) obj = App.getGson().fromJson(jsonObj, ClientChatLookupByMessageId.class);
 
                 // old thing, will auto-shadowban
+                // NOTE ([  ]): Might want to check that since it's not true.
                 if (type.equals("place")) obj = App.getGson().fromJson(jsonObj, ClientPlace.class);
 
                 // lol

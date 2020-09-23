@@ -2,12 +2,12 @@ package space.pxls.server.packets.socket;
 
 public class ServerReceivedReport {
     public final String type = "received_report";
-    public final Integer report_id;
-    public final Type report_type;
+    public final Integer reportId;
+    public final Type reportType;
 
-    public ServerReceivedReport(Integer report_id, Type report_type) {
-        this.report_id = report_id;
-        this.report_type = report_type;
+    public ServerReceivedReport(Integer reportId, Type reportType) {
+        this.reportId = reportId;
+        this.reportType = reportType;
     }
 
     public enum Type {

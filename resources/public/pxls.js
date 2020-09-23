@@ -3203,11 +3203,11 @@ window.App = (function() {
           }, {
             id: 'pixels',
             name: 'Pixels',
-            get: data => data.pixel_count
+            get: data => data.pixelCount
           }, {
             id: 'pixels_alltime',
             name: 'Alltime Pixels',
-            get: data => data.pixel_count_alltime
+            get: data => data.pixelCountAlltime
           }, {
             id: 'discord_name',
             name: 'Discord',
@@ -3412,7 +3412,7 @@ window.App = (function() {
           ), { closeExisting: false });
         });
         socket.on('received_report', (data) => {
-          new SLIDEIN.Slidein(`A new ${data.report_type.toLowerCase()} report has been received.`, 'info-circle').show().closeAfter(3000);
+          new SLIDEIN.Slidein(`A new ${data.reportType.toLowerCase()} report has been received.`, 'info-circle').show().closeAfter(3000);
         });
 
         settings.lookup.monospace.enable.listen(function(value) {
@@ -4138,7 +4138,7 @@ window.App = (function() {
           }
           self.seenHistory = true;
           self.addServerAction('History loaded at ' + moment().format('MMM Do YYYY, hh:mm:ss A'));
-          setTimeout(() => socket.send({ type: 'ChatbanState' }), 0);
+          setTimeout(() => socket.send({ type: 'chatban_state' }), 0);
         });
         socket.on('chat_message', e => {
           self._process(e.message);
@@ -4348,7 +4348,7 @@ window.App = (function() {
           }
         });
 
-        socket.send({ type: 'ChatHistory' });
+        socket.send({ type: 'chat_history' });
 
         self.elements.rate_limit_overlay.hide();
 
@@ -4997,7 +4997,7 @@ window.App = (function() {
         _selUsernameColor.value = user.getChatNameColor();
         uiHelper.styleElemWithChatNameColor(_selUsernameColor, user.getChatNameColor());
         _selUsernameColor.addEventListener('change', function() {
-          socket.send({ type: 'UserUpdate', updates: { NameColor: String(this.value >> 0) } });
+          socket.send({ type: 'user_update', updates: { NameColor: String(this.value >> 0) } });
         });
 
         settings.chat.font.size.controls.add(_txtFontSize);
@@ -5152,7 +5152,7 @@ window.App = (function() {
         }
       },
       _send: msg => {
-        socket.send({ type: 'ChatMessage', message: msg });
+        socket.send({ type: 'chat_message', message: msg });
       },
       jump: (x, y, zoom) => {
         if (typeof x !== 'number') { x = parseFloat(x); }
@@ -6029,12 +6029,12 @@ window.App = (function() {
           case 'lookup-chat': {
             if (board.snipMode) {
               socket.send({
-                type: 'ChatLookupByMessageId',
+                type: 'chat_lookup_by_message_id',
                 messageId: this.dataset.id
               });
             } else {
               socket.send({
-                type: 'ChatLookupByUsername',
+                type: 'chat_lookup_by_username',
                 username: reportingTarget
               });
             }
@@ -6674,7 +6674,7 @@ window.App = (function() {
 
           analytics('send', 'event', 'Auth', 'Login', data.method);
         });
-        socket.on('pixelCounts', function(data) {
+        socket.on('pixel_counts', function(data) {
           self.pixelCount = data.pixelCount;
           self.pixelCountAllTime = data.pixelCountAllTime;
 

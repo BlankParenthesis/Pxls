@@ -7,8 +7,8 @@ public class Lookup {
     public final int id;
     public final int x;
     public final int y;
-    public final int pixel_count;
-    public final int pixel_count_alltime;
+    public final int pixelCount;
+    public final int pixelCountAlltime;
     public final long time;
     public final String username;
     public final String discordName;
@@ -18,8 +18,8 @@ public class Lookup {
         this.id = id;
         this.x = x;
         this.y = y;
-        this.pixel_count = pixel_count;
-        this.pixel_count_alltime = pixel_count_alltime;
+        this.pixelCount = pixel_count;
+        this.pixelCountAlltime = pixel_count_alltime;
         this.time = time;
         this.username = username;
         this.discordName = discordName;

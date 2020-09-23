@@ -122,7 +122,7 @@ async function initFactionSearch() {
                           ),
                           crel('tr',
                             crel('th', { class: 'text-right pr-3' }, 'Created Date'),
-                            crel('td', { class: 'text-left' }, new Date(x.creation_ms).toString())
+                            crel('td', { class: 'text-left' }, new Date(x.creationMs).toString())
                           ),
                           crel('tr',
                             crel('th', { class: 'text-right pr-3' }, 'Created Canvas'),
