@@ -38,7 +38,8 @@ public class OpenIDConfig implements ConfigFactory {
             oidcConfiguration.setClientId(App.getConfig().getString("auth.client"));
             oidcConfiguration.setSecret(App.getConfig().getString("auth.secret"));
             oidcConfiguration.setDiscoveryURI(discoveryUri.toString());
-            oidcConfiguration.setScope("openid profile connected_accounts");
+            oidcConfiguration.setScope("openid profile offline_access connected_accounts");
+            oidcConfiguration.setPreferredJwsAlgorithmAsString("RS256");
             oidcConfiguration.setExpireSessionWithToken(true);
 
             boolean devmode;
