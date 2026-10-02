@@ -12,6 +12,7 @@ import space.pxls.auth.Provider;
 import space.pxls.user.User;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -48,30 +49,27 @@ public class AuthReader implements HttpHandler {
                                     exchange.getAttachment(IPReader.IP)
                                 );
                             }
-                            // TODO ([  ]): check if this needs to be updated.
-                            // Otherwise this is run for every request, which
-                            // is expensive. Users should probably also be cached
-                            // for similar reasons.
                             final Object maybe_accounts = profile.getAttribute("accounts");
-                            if (maybe_accounts instanceof JSONArray) {
-                                final JSONArray accounts = (JSONArray) maybe_accounts;
-
+                            if (maybe_accounts instanceof List) {
+                                System.out.println("add accounts");
+                                final List<?> accounts = (List) maybe_accounts;
                                 final List<Provider> links = accounts.stream()
-                                    .map(o -> {
-                                        Optional<Provider> provider;
-                                        if (o instanceof JSONObject) {
-                                            provider = Provider.fromJSON((JSONObject) o);
-                                        } else {
-                                            provider = Optional.empty();
-                                        }
-                                        return provider;
-                                    })
-                                    .filter(Optional::isPresent)
-                                    .map(Optional::get)
+                                    .map(o -> (o instanceof Map)
+                                        ? Provider.fromMap((Map) o)
+                                        : Optional.<Provider>empty()
+                                    )
+                                    .flatMap(Optional::stream)
                                     .collect(Collectors.toList());
                                     
                                 user.setLinks(links);
                             }
+                            // NOTE ([  ]): remove the attribute. This
+                            // essentially acts as a flag to signal that the
+                            // data has been updated. Since it will only get
+                            // populated the next time a change occurs, this
+                            // avoids the overhead of redundantly updating every
+                            // request.
+                            profile.removeAttribute("accounts");
                         } else {
                             boolean devmode;
                             try {
