@@ -47,7 +47,6 @@ public class User {
     private String chatbanReason;
     private long cooldownExpiry;
     private long lastPixelTime = 0;
-    private long initialAuthTime = 0L;
     private Timestamp signup_time;
     private Integer displayedFaction;
     private Boolean factionBlocked;
@@ -587,14 +586,6 @@ public class User {
         App.getDatabase().updateUserStacked(this, stacked);
     }
 
-    public long getInitialAuthTime() {
-        return initialAuthTime;
-    }
-
-    public void setInitialAuthTime(long initialAuthTime) {
-        this.initialAuthTime = initialAuthTime;
-    }
-
     public boolean lastPlaceWasStack() {
         return lastPlaceWasStack;
     }
@@ -621,17 +612,16 @@ public class User {
 
         int curCD = App.getServer().getPacketHandler().getCooldown();
 
-        long lastPixelTime = getLastPixelTime() == 0 ? (this.cooldownExpiry == 0 ? getInitialAuthTime() : (this.cooldownExpiry - (curCD*1000))) : getLastPixelTime();
-        if (lastPixelTime == 0) {
-            return;
+        long lastPixelTime;
+        if (getLastPixelTime() != 0) {
+            lastPixelTime = getLastPixelTime();
+        } else {
+            lastPixelTime = this.cooldownExpiry - (curCD*1000);
         }
+
         long delta = (System.currentTimeMillis()-lastPixelTime) / 1000;
-        //App.getLogger().debug("=======");
         while(true) {
             int target = (curCD * multiplier) * (2 + getStacked() + addToN(getStacked()));
-            //App.getLogger().debug(delta);
-            //App.getLogger().debug(" : ");
-            //App.getLogger().debug(target);
             if (delta >= target && getStacked() < maxStacked) {
                 setStacked(getStacked() + 1);
                 if (sendRes) {
@@ -713,86 +703,18 @@ public class User {
         App.getDatabase().setUserLinks(id, links);
     }
 
-    public boolean canUseDonatorCharNameColors() {
-        return hasPermission("chat.usercolor.donator") || hasPermission("chat.usercolor.donator.*");
+    public boolean canUseGradientChatNameColors() {
+        return hasPermission("chat.usercolor.gradient") || hasPermission("chat.usercolor.gradient.*");
     }
 
-    public boolean hasRainbowChatNameColor() {
-        return hasPermission("chat.usercolor.rainbow")
-                && this.chatNameColor == -1;
-
-    }
-
-    public boolean hasDonatorChatNameColor(String name, Integer idx) {
-        return (canUseDonatorCharNameColors() || hasPermission("chat.usercolor.donator." + name))
+    public boolean hasGradientChatNameColor(String name, Integer idx) {
+        return (canUseGradientChatNameColors() || hasPermission("chat.usercolor.gradient." + name))
                 && this.chatNameColor == -idx;
 
     }
 
     public int getChatNameColor() {
         return this.chatNameColor;
-    }
-
-    public List<String> getChatNameClasses() {
-        List<String> toReturn = new ArrayList<>();
-        if (this.hasRainbowChatNameColor()) {
-            toReturn.add("rainbow");
-        } else if (this.hasDonatorChatNameColor("green", 2)) {
-            toReturn.add("donator");
-            toReturn.add("donator--green");
-        } else if (this.hasDonatorChatNameColor("gray", 3)) {
-            toReturn.add("donator");
-            toReturn.add("donator--gray");
-        } else if (this.hasDonatorChatNameColor("synthwave", 4)) {
-            toReturn.add("donator");
-            toReturn.add("donator--synthwave");
-        } else if (this.hasDonatorChatNameColor("ace", 5)) {
-            toReturn.add("donator");
-            toReturn.add("donator--ace");
-        } else if (this.hasDonatorChatNameColor("trans", 6)) {
-            toReturn.add("donator");
-            toReturn.add("donator--trans");
-        } else if (this.hasDonatorChatNameColor("bi", 7)) {
-            toReturn.add("donator");
-            toReturn.add("donator--bi");
-        } else if (this.hasDonatorChatNameColor("pan", 8)) {
-            toReturn.add("donator");
-            toReturn.add("donator--pan");
-        } else if (this.hasDonatorChatNameColor("nonbinary", 9)) {
-            toReturn.add("donator");
-            toReturn.add("donator--nonbinary");
-        } else if (this.hasDonatorChatNameColor("mines", 10)) {
-            toReturn.add("donator");
-            toReturn.add("donator--mines");
-        } else if (this.hasDonatorChatNameColor("eggplant", 11)) {
-            toReturn.add("donator");
-            toReturn.add("donator--eggplant");
-        } else if (this.hasDonatorChatNameColor("banana", 12)) {
-            toReturn.add("donator");
-            toReturn.add("donator--banana");
-        } else if (this.hasDonatorChatNameColor("teal", 13)) {
-            toReturn.add("donator");
-            toReturn.add("donator--teal");
-        } else if (this.hasDonatorChatNameColor("icy", 14)) {
-            toReturn.add("donator");
-            toReturn.add("donator--icy");
-        } else if (this.hasDonatorChatNameColor("blood", 15)) {
-            toReturn.add("donator");
-            toReturn.add("donator--blood");
-        } else if (this.hasDonatorChatNameColor("forest", 16)) {
-            toReturn.add("donator");
-            toReturn.add("donator--forest");
-        } else if (this.hasDonatorChatNameColor("purple", 17)) {
-            toReturn.add("donator");
-            toReturn.add("donator--purple");
-        } else if (this.hasDonatorChatNameColor("gay", 18)) {
-            toReturn.add("donator");
-            toReturn.add("donator--gay");
-        } else if (this.hasDonatorChatNameColor("lesbian", 19)) {
-            toReturn.add("donator");
-            toReturn.add("donator--lesbian");
-        }
-        return toReturn.size() != 0 ? toReturn : null;
     }
 
     public void setChatNameColor(int colorIndex, boolean callDB, boolean broadcast) {

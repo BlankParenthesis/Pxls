@@ -18,6 +18,7 @@ public class CanvasInfo {
     public Boolean chatRespectsCanvasBan;
     public Integer chatCharacterLimit;
     public List<String> chatBannerText;
+    public List<Object> chatGradients;
     public Boolean snipMode;
     public String emoteSet7TV;
     public List<Object> customEmoji;
@@ -42,6 +43,7 @@ public class CanvasInfo {
         Integer chatCharacterLimit,
         boolean chatRespectsCanvasBan,
         List<String> chatBannerText,
+        List<Object> chatGradients,
         boolean snipMode,
         String emoteSet7TV,
         List<Object> customEmoji,
@@ -65,6 +67,7 @@ public class CanvasInfo {
         this.chatCharacterLimit = chatCharacterLimit;
         this.chatRespectsCanvasBan = chatRespectsCanvasBan;
         this.chatBannerText = chatBannerText;
+        this.chatGradients = chatGradients;
         this.snipMode = snipMode;
         this.emoteSet7TV = emoteSet7TV;
         this.customEmoji = customEmoji;
@@ -119,6 +122,10 @@ public class CanvasInfo {
 
     public List<String> getChatBannerText() {
         return chatBannerText;
+    }
+
+    public List<Object> getChatGradients() {
+        return chatGradients;
     }
 
     public Boolean getSnipMode() {

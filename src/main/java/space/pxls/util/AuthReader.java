@@ -51,7 +51,6 @@ public class AuthReader implements HttpHandler {
                             }
                             final Object maybe_accounts = profile.getAttribute("accounts");
                             if (maybe_accounts instanceof List) {
-                                System.out.println("add accounts");
                                 final List<?> accounts = (List) maybe_accounts;
                                 final List<Provider> links = accounts.stream()
                                     .map(o -> (o instanceof Map)

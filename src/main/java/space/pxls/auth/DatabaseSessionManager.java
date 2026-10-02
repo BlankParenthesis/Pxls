@@ -240,7 +240,7 @@ public class DatabaseSessionManager implements SessionManager {
         @Override
         public void invalidate(HttpServerExchange exchange) {
             var manager = DatabaseSessionManager.this;
-            synchronized (this.id) {                
+            synchronized (this.id) {
                 var session = manager.sessionCache.remove(id);
                 var reason = SessionDestroyedReason.INVALIDATED;
                 manager.listeners.forEach(l -> l.sessionDestroyed(session, exchange, reason));
@@ -249,6 +249,12 @@ public class DatabaseSessionManager implements SessionManager {
                     App.getDatabase().deleteSession(this.id);
                 }
             }
+        }
+
+        @Override
+        public boolean isInvalid() {
+            var manager = DatabaseSessionManager.this;
+            return !manager.sessionCache.containsKey(this.id);
         }
     
         @Override
@@ -265,6 +271,7 @@ public class DatabaseSessionManager implements SessionManager {
                 var manager = DatabaseSessionManager.this;
                 var session = manager.sessionCache.remove(oldId);
                 manager.sessionCache.put(newId, session);
+                config.setSessionId(exchange, newId);
                 this.id = newId;
                 
                 manager.listeners.forEach(l -> l.sessionIdChanged(this, oldId));

@@ -120,8 +120,7 @@ public class UndertowServer {
             SecurityHandler.build(
                 new IPReader(new AuthReader(new EagerFormParsingHandler().setNext(routingHandler))),
                 authConfig,
-                "HeaderClient,OidcClient,IpClient,AnonymousClient",
-                null
+                "HeaderClient,OidcClient,IpClient,AnonymousClient"
             ),
             new DatabaseSessionManager(),
             new SessionCookieConfig()
