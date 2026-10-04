@@ -324,34 +324,18 @@ public class Database {
         Optional<DBPixelPlacementFull> pp;
         try {
             pp = jdbi.withHandle(handle -> handle.select("SELECT " +
-                    // pixel fields
-                    "p.id as p_id, " +
-                    "p.x, " +
-                    "p.y, " +
-                    "p.color, " +
-                    "p.secondary_id, " +
-                    "p.time, " +
-                    "p.mod_action, " +
-                    "p.undo_action, " +
-                    // user fields
-                    "u.id as u_id, " +
-                    "u.username, " +
-                    "u.sub, " +
-                    "u.login_with_ip, " +
-                    "u.ban_expiry, " +
-                    "u.is_shadow_banned, " +
-                    "u.pixel_count, " +
-                    "u.pixel_count_alltime, " +
-                    "u.ban_reason, " +
-                    "u.user_agent, " +
-                    "f.name as \"faction\", " +
-                    "l.user_name as \"discord_name\" " +
-                    "FROM pixels p " +
-                    "LEFT JOIN users u ON p.who = u.id " +
-                    "LEFT JOIN faction f ON f.id = u.displayed_faction " +
-                    "LEFT JOIN user_links l ON l.uid = u.id AND l.identity_provider ILIKE 'discord' " +
-                    "WHERE p.x = :x AND p.y = :y AND p.most_recent " +
-                    "ORDER BY p.time DESC LIMIT 1")
+                    "id, " +
+                    "x, " +
+                    "y, " +
+                    "color, " +
+                    "time, " +
+                    "mod_action, " +
+                    "who, " + 
+                    "secondary_id, " +
+                    "undo_action " +
+                    "FROM pixels " +
+                    "WHERE x = :x AND y = :y AND most_recent " +
+                    "ORDER BY time DESC LIMIT 1")
                 .bind("x", x)
                 .bind("y", y)
                 .map(new DBPixelPlacementFull.Mapper())
@@ -372,29 +356,16 @@ public class Database {
         Optional<DBPixelPlacement> pp;
         try {
             pp = jdbi.withHandle(handle -> handle.select("SELECT " +
-                    // pixel fields
-                    "p.id as p_id, " +
-                    "p.x, " +
-                    "p.y, " +
-                    "p.color, " +
-                    "p.time, " +
-                    "p.mod_action, " +
-                    // user fields
-                    "u.id as u_id, " +
-                    "u.username, " +
-                    "u.ban_expiry, " +
-                    "u.is_shadow_banned, " +
-                    "u.pixel_count, " +
-                    "u.pixel_count_alltime, " +
-                    "u.login_with_ip, " +
-                    "f.name as \"faction\", " +
-                    "l.user_name as \"discord_name\" " +
-                    "FROM pixels p " +
-                    "LEFT JOIN users u ON p.who = u.id " +
-                    "LEFT JOIN faction f ON f.id = u.displayed_faction " +
-                    "LEFT JOIN user_links l ON l.uid = u.id AND l.identity_provider ILIKE 'discord' " +
-                    "WHERE p.x = :x AND p.y = :y AND p.most_recent " +
-                    "ORDER BY p.time DESC LIMIT 1")
+                    "id, " +
+                    "x, " +
+                    "y, " +
+                    "color, " +
+                    "time, " +
+                    "mod_action, " +
+                    "who " + 
+                    "FROM pixels " +
+                    "WHERE x = :x AND y = :y AND most_recent " +
+                    "ORDER BY time DESC LIMIT 1")
                 .bind("x", x)
                 .bind("y", y)
                 .map(new DBPixelPlacement.Mapper())
@@ -422,33 +393,17 @@ public class Database {
      */
     private DBPixelPlacementFull getPixelByID(Handle handle, int id) {
         return handle.select("SELECT " +
-                // pixel fields
-                "p.id as p_id, " +
-                "p.x, " +
-                "p.y, " +
-                "p.color, " +
-                "p.who, " +
-                "p.secondary_id, " +
-                "p.time, " +
-                "p.mod_action, " +
-                "p.undo_action, " +
-                // user fields
-                "u.id as u_id, " +
-                "u.username, " +
-                "u.sub, " +
-                "u.login_with_ip, " +
-                "u.ban_expiry, " +
-                "u.is_shadow_banned, " +
-                "u.ban_reason, " +
-                "u.user_agent, " +
-                "u.pixel_count, " +
-                "u.pixel_count_alltime, " +
-                "f.name as \"faction\" FROM pixels p, " +
-                "l.user_name as \"discord_name\" " +
-                "LEFT JOIN users u ON p.who = u.id " +
-                "LEFT JOIN faction f ON f.id = u.displayed_faction " +
-                "LEFT JOIN user_links l ON l.uid = u.id AND l.identity_provider ILIKE 'discord' " +
-                "WHERE p.id = :id")
+                "id, " +
+                "x, " +
+                "y, " +
+                "color, " +
+                "time, " +
+                "mod_action, " +
+                "who, " + 
+                "secondary_id, " +
+                "undo_action " +
+                "FROM pixels " +
+                "WHERE id = :id")
             .bind("id", id)
             .map(new DBPixelPlacementFull.Mapper())
             .findFirst()
@@ -474,7 +429,8 @@ public class Database {
                     try {
                         int prevId = toIntExact((long) entry.get("secondary_id"));
                         toPixel = getPixelByID(handle, prevId);
-                        while (toPixel.banned || toPixel.ban_expiry > Instant.now().toEpochMilli() || toPixel.userId == who.getId() || toPixel.undoAction) {
+                        User user = toPixel.getUser();
+                        while (user.isBanned() || user.getId() == who.getId() || toPixel.undoAction) {
                             if (toPixel.secondaryId != 0) {
                                 toPixel = getPixelByID(handle, toPixel.secondaryId);
                             } else {
@@ -501,10 +457,7 @@ public class Database {
                 .mapToMap()
                 .map(entry -> {
                     int from = toIntExact((long) entry.get("secondary_id"));
-                    return handle.select("SELECT p.id as p_id, p.x, p.y, p.color, p.who, p.secondary_id, p.time, p.mod_action, p.undo_action, u.id as u_id, u.username, u.sub, u.login_with_ip, u.ban_expiry, u.is_shadow_banned, u.ban_reason, u.user_agent, u.pixel_count, u.pixel_count_alltime FROM pixels p LEFT JOIN users u on p.who = u.id WHERE p.id = :id")
-                            .bind("id", from)
-                            .map(new DBPixelPlacementFull.Mapper())
-                            .first();
+                    return getPixelByID(handle, from);
                 })
                 .stream()
                 // Filter out places where pixels were placed after the initial rollback.
@@ -649,7 +602,21 @@ public class Database {
      * @return The latest undo pixel.
      */
     public DBPixelPlacementFull getUserUndoPixel(User who) {
-        return jdbi.withHandle(handle -> handle.select("SELECT p.id as p_id, p.x, p.y, p.color, p.who, p.secondary_id, p.time, p.mod_action, p.rollback_action, p.undone, p.undo_action, p.most_recent, u.id as u_id, u.stacked, u.username, u.sub, u.signup_time, u.cooldown_expiry, u.ban_expiry, u.is_shadow_banned, u.login_with_ip, u.signup_ip, u.last_ip, u.last_ip_alert, u.perma_chat_banned, u.chat_ban_expiry, u.chat_ban_reason, u.ban_reason, u.user_agent, u.pixel_count, u.pixel_count_alltime, u.chat_name_color FROM pixels p LEFT JOIN users u ON p.who = u.id WHERE p.who = :who AND NOT p.rollback_action ORDER BY p.id DESC LIMIT 1")
+        return jdbi.withHandle(handle -> handle.select("SELECT " +
+                    "id, " +
+                    "x, " +
+                    "y, " +
+                    "color, " +
+                    "time, " +
+                    "mod_action, " +
+                    "who, " + 
+                    "secondary_id, " +
+                    "undo_action " +
+                    "FROM pixels " +
+                    "WHERE who = :who " +
+                    "AND NOT rollback_action " +
+                    "ORDER BY id DESC " +
+                    "LIMIT 1")
                 .bind("who", who.getId())
                 .map(new DBPixelPlacementFull.Mapper())
                 .first());

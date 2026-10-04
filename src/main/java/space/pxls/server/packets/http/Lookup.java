@@ -2,6 +2,7 @@ package space.pxls.server.packets.http;
 
 import space.pxls.App;
 import space.pxls.data.DBPixelPlacement;
+import space.pxls.user.User;
 
 public class Lookup {
     public static final String ORIGIN_NUKE = "nuke";
@@ -47,7 +48,7 @@ public class Lookup {
     }
 
     public static String originFromPixel(DBPixelPlacement pixelPlacement) {
-        if (pixelPlacement.username == null) {
+        if (pixelPlacement.getUser() == null) {
             return ORIGIN_NUKE;
         } else if(pixelPlacement.modAction) {
             return ORIGIN_MODACTION;
@@ -62,17 +63,18 @@ public class Lookup {
 
     public static Lookup fromDB(DBPixelPlacement pixelPlacement) {
         if (pixelPlacement == null) return null;
+        User user = pixelPlacement.getUser();
         return new Lookup(
             pixelPlacement.id,
             pixelPlacement.x,
             pixelPlacement.y,
             originFromPixel(pixelPlacement),
-            pixelPlacement.pixelCount,
-            pixelPlacement.pixelCountAlltime,
+            user.getPixelCount(),
+            user.getAllTimePixelCount(),
             pixelPlacement.time,
-            pixelPlacement.username,
-            pixelPlacement.discordName,
-            pixelPlacement.faction
+            user.getName(),
+            user.getDiscordName(),
+            user.getDisplayedFaction().map(f -> f.getName()).orElse(null)
         );
     }
 }

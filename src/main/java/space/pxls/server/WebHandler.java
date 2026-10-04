@@ -172,7 +172,7 @@ public class WebHandler {
                                     sendBadRequest(exchange, "You cannot leave a faction you own. Transfer ownership first.");
                                 } else {
                                     FactionManager.getInstance().leaveFaction(fid, user.getId());
-                                    if (user.getDisplayedFaction() != null && user.getDisplayedFaction() == fid) {
+                                    if (user.getDisplayedFaction().map(f -> f.getId() == fid).orElse(false)) {
                                         user.setDisplayedFaction(null, false, true); // displayed_faction is updated by #leaveFaction() already. we just need to invalidate the memcache.
                                     }
                                 }

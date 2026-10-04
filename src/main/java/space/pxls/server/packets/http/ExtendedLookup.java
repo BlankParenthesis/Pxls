@@ -4,6 +4,7 @@ import java.util.List;
 
 import space.pxls.App;
 import space.pxls.auth.Provider;
+import space.pxls.user.User;
 
 public class ExtendedLookup extends Lookup {
     public final List<Provider> logins;
@@ -41,20 +42,23 @@ public class ExtendedLookup extends Lookup {
 
     public static ExtendedLookup fromDB(int x, int y) {
         return App.getDatabase().getFullPixelAt(x, y)
-            .map(placement -> new ExtendedLookup(
-                placement.id,
-                placement.x,
-                placement.y,
-                originFromPixel(placement),
-                placement.pixelCount,
-                placement.pixelCountAlltime,
-                placement.time,
-                placement.username,
-                placement.discordName,
-                placement.faction,
-                placement.logins,
-                placement.userAgent
-            ))
+            .map(placement -> {
+                User user = placement.getUser();
+                return new ExtendedLookup(
+                    placement.id,
+                    placement.x,
+                    placement.y,
+                    originFromPixel(placement),
+                    user.getPixelCount(),
+                    user.getAllTimePixelCount(),
+                    placement.time,
+                    user.getName(),
+                    user.getDiscordName(),
+                    user.getDisplayedFaction().map(f -> f.getName()).orElse(null),
+                    user.getLogins(),
+                    user.getUserAgent()
+                );
+            })
             .orElse(null);
     }
 }

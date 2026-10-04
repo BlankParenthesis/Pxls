@@ -798,8 +798,8 @@ public class User {
         return signup_time;
     }
 
-    public Integer getDisplayedFaction() {
-        return displayedFaction;
+    public Optional<Faction> getDisplayedFaction() {
+    	return FactionManager.getInstance().getByID(displayedFaction);
     }
 
     public void setDisplayedFactionMaybe(Integer displayedFaction) {
