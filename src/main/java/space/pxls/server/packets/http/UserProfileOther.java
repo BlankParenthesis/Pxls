@@ -1,6 +1,6 @@
 package space.pxls.server.packets.http;
 
-import space.pxls.user.ProfileFaction;
+import space.pxls.auth.Provider;
 import space.pxls.user.ProfileFactionOther;
 import space.pxls.user.Role;
 
@@ -21,5 +21,6 @@ public record UserProfileOther(
         boolean isChatBanned,
         boolean isPermaChatBanned,
         long chatBanExpiry,
-        boolean isFactionRestricted
+        boolean isFactionRestricted,
+        List<Provider> logins
 ) {}

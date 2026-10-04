@@ -1,6 +1,9 @@
 package space.pxls.server.packets.http;
 
+import java.util.List;
+
 import space.pxls.App;
+import space.pxls.auth.Provider;
 import space.pxls.data.DBPixelPlacement;
 import space.pxls.user.User;
 
@@ -16,7 +19,7 @@ public class Lookup {
     public Integer pixelCountAlltime;
     public long time;
     public String username;
-    public String discordName = null;
+    public List<Provider> logins;
     public String faction;
 
     public Lookup(
@@ -28,7 +31,7 @@ public class Lookup {
         Integer pixelCountAlltime,
         long time,
         String username,
-        String discordName,
+        List<Provider> logins,
         String faction
     ) {
         this.id = id;
@@ -39,7 +42,7 @@ public class Lookup {
         this.pixelCountAlltime = username != null ? pixelCountAlltime : null;
         this.time = time;
         this.username = username;
-        this.discordName = discordName;
+        this.logins = logins;
         this.faction = faction;
     }
 
@@ -73,7 +76,7 @@ public class Lookup {
             user.getAllTimePixelCount(),
             pixelPlacement.time,
             user.getName(),
-            user.getDiscordName(),
+            user.getLogins(),
             user.getDisplayedFaction().map(f -> f.getName()).orElse(null)
         );
     }

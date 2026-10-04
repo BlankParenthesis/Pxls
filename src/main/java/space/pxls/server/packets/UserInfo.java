@@ -1,5 +1,6 @@
 package space.pxls.server.packets;
 
+import space.pxls.auth.Provider;
 import space.pxls.user.PlacementOverrides;
 import space.pxls.user.Role;
 
@@ -20,7 +21,7 @@ public class UserInfo {
     public Boolean chatbanIsPerma;
     public Long chatbanExpiry;
     public Boolean renameRequested;
-    public String discordName;
+    public List<Provider> logins;
     public Number chatNameColor;
 
     public UserInfo(
@@ -38,7 +39,7 @@ public class UserInfo {
         Boolean chatbanIsPerma, 
         Long chatbanExpiry, 
         Boolean renameRequested, 
-        String discordName,
+        List<Provider> logins,
         Number chatNameColor
     ) {
         this.username = username;
@@ -55,7 +56,7 @@ public class UserInfo {
         this.chatbanIsPerma = chatbanIsPerma;
         this.chatbanExpiry = chatbanExpiry;
         this.renameRequested = renameRequested;
-        this.discordName = discordName;
+        this.logins = logins;
         this.chatNameColor = chatNameColor;
     }
 
@@ -107,8 +108,8 @@ public class UserInfo {
         return renameRequested;
     }
 
-    public String getDiscordName() {
-        return discordName;
+    public List<Provider> getLogins() {
+        return logins;
     }
 
     public Number getChatNameColor() {

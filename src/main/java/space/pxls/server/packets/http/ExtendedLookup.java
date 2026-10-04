@@ -7,7 +7,7 @@ import space.pxls.auth.Provider;
 import space.pxls.user.User;
 
 public class ExtendedLookup extends Lookup {
-    public final List<Provider> logins;
+    public final List<Provider> allLogins;
     public final String userAgent;
 
     public ExtendedLookup(
@@ -19,7 +19,6 @@ public class ExtendedLookup extends Lookup {
         int pixelCountAllTime,
         long time,
         String username,
-        String discordName,
         String faction,
         List<Provider> logins,
         String userAgent
@@ -33,10 +32,10 @@ public class ExtendedLookup extends Lookup {
             pixelCountAllTime, 
             time, 
             username, 
-            discordName, 
+            logins, 
             faction
         );
-        this.logins = logins;
+        this.allLogins = logins;
         this.userAgent = userAgent;
     }
 
@@ -53,7 +52,6 @@ public class ExtendedLookup extends Lookup {
                     user.getAllTimePixelCount(),
                     placement.time,
                     user.getName(),
-                    user.getDiscordName(),
                     user.getDisplayedFaction().map(f -> f.getName()).orElse(null),
                     user.getLogins(),
                     user.getUserAgent()

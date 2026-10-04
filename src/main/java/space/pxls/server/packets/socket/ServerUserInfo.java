@@ -1,6 +1,7 @@
 package space.pxls.server.packets.socket;
 
 import space.pxls.user.Role;
+import space.pxls.auth.Provider;
 import space.pxls.server.packets.UserInfo;
 import space.pxls.user.PlacementOverrides;
 
@@ -24,7 +25,7 @@ public class ServerUserInfo extends UserInfo {
 		Boolean chatbanIsPerma,
 		Long chatbanExpiry,
 		Boolean renameRequested,
-		String discordName,
+		List<Provider> logins,
 		Number chatNameColor
 	) {
         super(
@@ -42,7 +43,7 @@ public class ServerUserInfo extends UserInfo {
 			chatbanIsPerma,
 			chatbanExpiry,
 			renameRequested,
-			discordName,
+			logins,
 			chatNameColor
 		);
 	}

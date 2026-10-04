@@ -8,7 +8,7 @@ import space.pxls.server.packets.UserInfo;
 import java.util.List;
 
 public class ExtendedUserInfo extends UserInfo {
-    public List<Provider> logins;
+    public List<Provider> allLogins;
 
     public ExtendedUserInfo(
         String username,
@@ -26,7 +26,7 @@ public class ExtendedUserInfo extends UserInfo {
         Boolean chatbanIsPerma,
         Long chatbanExpiry,
         Boolean renameRequested,
-        String discordName,
+        List<Provider> allLogins,
         Number chatNameColor
     ) {
         super(
@@ -44,14 +44,14 @@ public class ExtendedUserInfo extends UserInfo {
             chatbanIsPerma,
             chatbanExpiry,
             renameRequested,
-            discordName,
+            logins,
             chatNameColor
         );
 
-        this.logins = logins;
+        this.allLogins = allLogins;
     }
 
-    List<Provider> getLogins() {
-        return logins;
+    List<Provider> getAllLogins() {
+        return allLogins;
     }
 }

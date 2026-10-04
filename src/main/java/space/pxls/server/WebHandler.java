@@ -1400,7 +1400,7 @@ public class WebHandler {
                         user.isPermaChatbanned(),
                         user.getChatbanExpiryTime(),
                         user.isRenameRequested(true),
-                        user.getDiscordName(),
+                        user.getLogins(),
                         user.getChatNameColor()
                     )));
             } else {

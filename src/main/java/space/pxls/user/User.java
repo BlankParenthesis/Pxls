@@ -686,16 +686,7 @@ public class User {
         this.name = newName;
     }
 
-    public String getDiscordName() {
-        return getLinks()
-            .stream()
-            .filter(p -> p.identityProvider.equalsIgnoreCase("discord"))
-            .findAny()
-            .map(p -> p.userName)
-            .orElse(null);
-    }
-
-    public List<Provider> getLinks() {
+    private List<Provider> getLinks() {
         return App.getDatabase().getUserLinks(id);
     }
 
@@ -799,7 +790,7 @@ public class User {
     }
 
     public Optional<Faction> getDisplayedFaction() {
-    	return FactionManager.getInstance().getByID(displayedFaction);
+        return FactionManager.getInstance().getByID(displayedFaction);
     }
 
     public void setDisplayedFactionMaybe(Integer displayedFaction) {
@@ -902,7 +893,8 @@ public class User {
                 isChatbanned(),
                 isPermaChatbanned,
                 chatbanExpiryTime,
-                factionBlocked
+                factionBlocked,
+                getLogins()
         );
     }
 
@@ -949,7 +941,8 @@ public class User {
                 isChatbanned(),
                 isPermaChatbanned,
                 chatbanExpiryTime,
-                factionBlocked
+                factionBlocked,
+                getLogins()
         );
     }
 }
