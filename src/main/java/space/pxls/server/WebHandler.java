@@ -1387,7 +1387,7 @@ public class WebHandler {
                     new ExtendedUserInfo(
                         user.getName(),
                         user.getAllRoles(),
-                        user.getLogins(),
+                        user.getVisibleLogins(),
                         user.getPixelCount(),
                         user.getAllTimePixelCount(),
                         user.isBanned(),
@@ -1400,8 +1400,8 @@ public class WebHandler {
                         user.isPermaChatbanned(),
                         user.getChatbanExpiryTime(),
                         user.isRenameRequested(true),
-                        user.getLogins(),
-                        user.getChatNameColor()
+                        user.getChatNameColor(),
+                        user.getAllLogins()
                     )));
             } else {
                 exchange.setStatusCode(400);

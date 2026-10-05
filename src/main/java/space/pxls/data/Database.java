@@ -105,7 +105,8 @@ public class Database {
                     "uid INT NOT NULL REFERENCES users(id)," +
                     "user_name VARCHAR(64)," +
                     "user_id VARCHAR(64)," +
-                    "identity_provider VARCHAR(64) NOT NULL);" + 
+                    "identity_provider VARCHAR(64) NOT NULL," + 
+                    "visible BOOLEAN NOT NULL DEFAULT FALSE);" + 
                     "CREATE UNIQUE INDEX IF NOT EXISTS _user_links_user_uid_service_triplet ON user_links (uid, user_id, identity_provider)")
                     .execute();
             // roles
@@ -927,7 +928,7 @@ public class Database {
      */
     public List<Provider> getUserLinks(int who) {
         return jdbi.withHandle(handle -> 
-            handle.select("SELECT uid, user_name, user_id, identity_provider FROM user_links WHERE uid = :who")
+            handle.select("SELECT uid, user_name, user_id, identity_provider, visible FROM user_links WHERE uid = :who")
                 .bind("who", who)
                 .map(new Provider.Mapper())
                 .list()

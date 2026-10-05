@@ -3,6 +3,7 @@ package space.pxls.server.packets.http;
 import space.pxls.user.PlacementOverrides;
 import space.pxls.user.Role;
 import space.pxls.auth.Provider;
+import space.pxls.auth.Provider.VisibleProvider;
 import space.pxls.server.packets.UserInfo;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public class ExtendedUserInfo extends UserInfo {
     public ExtendedUserInfo(
         String username,
         List<Role> roles,
-        List<Provider> logins,
+        List<VisibleProvider> logins,
         int pixelCount,
         int pixelCountAllTime,
         Boolean banned,
@@ -26,8 +27,8 @@ public class ExtendedUserInfo extends UserInfo {
         Boolean chatbanIsPerma,
         Long chatbanExpiry,
         Boolean renameRequested,
-        List<Provider> allLogins,
-        Number chatNameColor
+        Number chatNameColor,
+        List<Provider> allLogins
     ) {
         super(
             username,

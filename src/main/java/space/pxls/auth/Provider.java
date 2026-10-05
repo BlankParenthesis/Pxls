@@ -12,11 +12,13 @@ public class Provider {
     public final String userName;    
     public final String userId;    
     public final String identityProvider;
+    public final boolean visible;
 
-    public Provider(String userName, String userId, String identityProvider) {
+    public Provider(String userName, String userId, String identityProvider, boolean visible) {
         this.userName = userName;
         this.userId = userId;
         this.identityProvider = identityProvider;
+        this.visible = visible;
     }
 
     public static Optional<Provider> fromMap(Map json) {
@@ -28,7 +30,15 @@ public class Provider {
             final String userId = (String) maybeId;
             final String identityProvider = (String) maybeProvider;
 
-            return Optional.of(new Provider(userName, userId, identityProvider));
+            return Optional.of(new Provider(userName, userId, identityProvider, false));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<VisibleProvider> toVisible() {
+        if (visible) {
+            return Optional.of(new VisibleProvider(userName, userId, identityProvider));
         } else {
             return Optional.empty();
         }
@@ -40,8 +50,15 @@ public class Provider {
             return new Provider(
                 r.getString("user_name"),
                 r.getString("user_id"),
-                r.getString("identity_provider")
+                r.getString("identity_provider"),
+                r.getBoolean("visible")
             );
         }
     }
+
+    public record VisibleProvider(
+        String userName,
+        String userId,
+        String identityProvider
+    ) {}
 }

@@ -1,6 +1,6 @@
 package space.pxls.server.packets;
 
-import space.pxls.auth.Provider;
+import space.pxls.auth.Provider.VisibleProvider;
 import space.pxls.user.PlacementOverrides;
 import space.pxls.user.Role;
 
@@ -21,7 +21,7 @@ public class UserInfo {
     public Boolean chatbanIsPerma;
     public Long chatbanExpiry;
     public Boolean renameRequested;
-    public List<Provider> logins;
+    public List<VisibleProvider> logins;
     public Number chatNameColor;
 
     public UserInfo(
@@ -39,7 +39,7 @@ public class UserInfo {
         Boolean chatbanIsPerma, 
         Long chatbanExpiry, 
         Boolean renameRequested, 
-        List<Provider> logins,
+        List<VisibleProvider> logins,
         Number chatNameColor
     ) {
         this.username = username;
@@ -108,7 +108,7 @@ public class UserInfo {
         return renameRequested;
     }
 
-    public List<Provider> getLogins() {
+    public List<VisibleProvider> getLogins() {
         return logins;
     }
 

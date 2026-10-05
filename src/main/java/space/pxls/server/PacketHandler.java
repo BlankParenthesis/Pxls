@@ -82,8 +82,9 @@ public class PacketHandler {
                     user.isPermaChatbanned(),
                     user.getChatbanExpiryTime(),
                     user.isRenameRequested(true),
-                    user.getLogins(),
-                    user.getChatNameColor()
+                    user.getVisibleLogins(),
+                    user.getChatNameColor(),
+                    user.getAllLogins()
             ));
             sendAvailablePixels(channel, user, "auth");
         }

@@ -3,6 +3,7 @@ package space.pxls.user;
 import io.undertow.websockets.core.WebSocketChannel;
 import space.pxls.App;
 import space.pxls.auth.Provider;
+import space.pxls.auth.Provider.VisibleProvider;
 import space.pxls.data.DBFaction;
 import space.pxls.data.DBUser;
 import space.pxls.data.DBUserPixelCounts;
@@ -253,10 +254,16 @@ public class User {
                 .anyMatch(role -> role.hasPermission(node));
     }
 
-    public List<Provider> getLogins() {
+    public List<Provider> getAllLogins() {
         List<Provider> logins = getLinks();
-        logins.add(new Provider(name, login, "pxls"));
+        logins.add(new Provider(name, login, "pxls", false));
         return logins;
+    }
+
+    public List<VisibleProvider> getVisibleLogins() {
+        return getAllLogins().stream()
+            .flatMap(p -> p.toVisible().stream())
+            .toList();
     }
 
     public boolean loginsWithIP() {
@@ -687,6 +694,7 @@ public class User {
     }
 
     private List<Provider> getLinks() {
+        // TODO ([  ]): cache
         return App.getDatabase().getUserLinks(id);
     }
 
@@ -894,7 +902,7 @@ public class User {
                 isPermaChatbanned,
                 chatbanExpiryTime,
                 factionBlocked,
-                getLogins()
+                getAllLogins()
         );
     }
 
@@ -942,7 +950,7 @@ public class User {
                 isPermaChatbanned,
                 chatbanExpiryTime,
                 factionBlocked,
-                getLogins()
+                getVisibleLogins()
         );
     }
 }

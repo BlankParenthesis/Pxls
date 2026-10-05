@@ -4,6 +4,7 @@ import java.util.List;
 
 import space.pxls.App;
 import space.pxls.auth.Provider;
+import space.pxls.auth.Provider.VisibleProvider;
 import space.pxls.user.User;
 
 public class ExtendedLookup extends Lookup {
@@ -20,7 +21,8 @@ public class ExtendedLookup extends Lookup {
         long time,
         String username,
         String faction,
-        List<Provider> logins,
+        List<VisibleProvider> logins,
+        List<Provider> allLogins,
         String userAgent
     ) {
         super(
@@ -35,7 +37,7 @@ public class ExtendedLookup extends Lookup {
             logins, 
             faction
         );
-        this.allLogins = logins;
+        this.allLogins = allLogins;
         this.userAgent = userAgent;
     }
 
@@ -53,7 +55,8 @@ public class ExtendedLookup extends Lookup {
                     placement.time,
                     user.getName(),
                     user.getDisplayedFaction().map(f -> f.getName()).orElse(null),
-                    user.getLogins(),
+                    user.getVisibleLogins(),
+                    user.getAllLogins(),
                     user.getUserAgent()
                 );
             })

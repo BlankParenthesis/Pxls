@@ -3,7 +3,7 @@ package space.pxls.server.packets.http;
 import java.util.List;
 
 import space.pxls.App;
-import space.pxls.auth.Provider;
+import space.pxls.auth.Provider.VisibleProvider;
 import space.pxls.data.DBPixelPlacement;
 import space.pxls.user.User;
 
@@ -19,7 +19,7 @@ public class Lookup {
     public Integer pixelCountAlltime;
     public long time;
     public String username;
-    public List<Provider> logins;
+    public List<VisibleProvider> logins;
     public String faction;
 
     public Lookup(
@@ -31,7 +31,7 @@ public class Lookup {
         Integer pixelCountAlltime,
         long time,
         String username,
-        List<Provider> logins,
+        List<VisibleProvider> logins,
         String faction
     ) {
         this.id = id;
@@ -76,7 +76,7 @@ public class Lookup {
             user.getAllTimePixelCount(),
             pixelPlacement.time,
             user.getName(),
-            user.getLogins(),
+            user.getVisibleLogins(),
             user.getDisplayedFaction().map(f -> f.getName()).orElse(null)
         );
     }
