@@ -84,7 +84,7 @@ public class PacketHandler {
                     user.isRenameRequested(true),
                     user.getVisibleLogins(),
                     user.getChatNameColor(),
-                    user.getAllLogins()
+                    user.getAllExternalLogins()
             ));
             sendAvailablePixels(channel, user, "auth");
         }

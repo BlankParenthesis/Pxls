@@ -9,8 +9,8 @@ import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
 public class Provider {
-    public final String userName;    
-    public final String userId;    
+    public final String userName;
+    public final String userId;
     public final String identityProvider;
     public final boolean visible;
 

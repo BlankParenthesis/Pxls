@@ -83,6 +83,7 @@ public class UndertowServer {
                 .addPermGatedPrefixPath("/users", "user.online", webHandler::users)
                 .addPermGatedPrefixPath("/chat/history", "chat.history", new RateLimitingHandler(new DisableCacheHandler(webHandler::chatHistory), "http:chatHistory", (int) App.getConfig().getDuration("server.limits.chatHistory.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.chatHistory.count")))
                 .addPermGatedPrefixPath("/chat/setColor", "user.chatColorChange", new RateLimitingHandler(webHandler::chatColorChange, "http:chatColorChange", (int) App.getConfig().getDuration("server.limits.chatColorChange.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.chatColorChange.count")))
+                .addPermGatedPrefixPath("/setLinkVisibility", "user.links.setVisible", new RateLimitingHandler(webHandler::setLinkVisibility, "http:linkVisible", (int) App.getConfig().getDuration("server.limits.linkVisibilityChange.time", TimeUnit.SECONDS), App.getConfig().getInt("server.limits.linkVisibilityChange.count")))
                 .addPermGatedPrefixPath("/admin", "user.admin", Handlers.resource(new ClassPathResourceManager(App.class.getClassLoader(), "public/admin/")).setCacheTime(10))
                 .addPermGatedPrefixPath("/admin/ban", "user.ban", webHandler::ban)
                 .addPermGatedPrefixPath("/admin/unban", "user.unban", webHandler::unban)

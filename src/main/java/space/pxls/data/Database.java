@@ -1210,6 +1210,31 @@ public class Database {
     }
 
     /**
+     * Sets the visible state of a connected profile for the specified {@link User}.
+     * @param who The {@link User}'s ID.
+     * @param service The connected account type.
+     * @param serviceId The ID of the user on the connected account.
+     * @param visible The visibility state to set.
+     * @return If any rows were affected
+     */
+    public boolean setLinkVisible(int who, String service, String serviceId, boolean visible) {
+        var result = jdbi.withHandle(handle -> handle
+                .createUpdate(
+                    "UPDATE user_links " +
+                    "SET visible = :visible " +
+                    "WHERE uid = :who " +
+                    "AND identity_provider = :service " +
+                    "AND user_id = :serviceId"
+                )
+                .bind("who", who)
+                .bind("service", service)
+                .bind("serviceId", serviceId)
+                .bind("visible", visible)
+                .execute());
+        return result > 0;
+    }
+
+    /**
      * @param initiatorID The initiator's {@link User} ID.
      * @param bannedID The banned {@link User}'s ID.
      * @param when The ban creation date.

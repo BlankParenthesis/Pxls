@@ -253,9 +253,14 @@ public class User {
                 .flatMap(Collection::stream)
                 .anyMatch(role -> role.hasPermission(node));
     }
+    
+    public List<Provider> getAllExternalLogins() {
+        List<Provider> logins = getLinks();
+        return logins;
+    }
 
     public List<Provider> getAllLogins() {
-        List<Provider> logins = getLinks();
+        List<Provider> logins = getAllExternalLogins();
         logins.add(new Provider(name, login, "pxls", false));
         return logins;
     }
@@ -727,6 +732,10 @@ public class User {
                 .build()
             );
         }
+    }
+
+    public boolean setLinkVisible(String service, String serviceId, boolean visible) {
+        return App.getDatabase().setLinkVisible(id, service, serviceId, visible);
     }
 
     /**

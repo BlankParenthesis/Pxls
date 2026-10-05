@@ -26,7 +26,6 @@ import space.pxls.server.packets.chat.ChatMessage;
 import space.pxls.server.packets.http.Error;
 import space.pxls.server.packets.http.*;
 import space.pxls.server.packets.socket.*;
-import space.pxls.auth.OpenIDConfig;
 import space.pxls.user.*;
 import space.pxls.util.*;
 
@@ -1008,6 +1007,56 @@ public class WebHandler {
         } catch (NumberFormatException nfe) {
             sendBadRequest(exchange, "Invalid color index");
             return;
+        }
+    }
+    
+    public void setLinkVisibility(HttpServerExchange exchange) {
+        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
+
+        User user = exchange.getAttachment(AuthReader.USER);
+        if (user == null) {
+            sendBadRequest(exchange);
+            return;
+        }
+
+        FormData data = exchange.getAttachment(FormDataParser.FORM_DATA);
+
+        FormData.FormValue formLink = data.getFirst("account");
+        if (formLink == null || formLink.getValue().trim().isEmpty()) {
+            sendBadRequest(exchange);
+            return;
+        }
+
+        var linkSplit = formLink.getValue().split(":", 2);
+        if (linkSplit.length < 2) {
+            sendBadRequest(exchange);
+            return;
+        }
+        var linkService = linkSplit[0];
+        var linkId = linkSplit[1];
+        
+        FormData.FormValue formVisible = data.getFirst("visible");
+        if (formVisible == null || formVisible.getValue().trim().isEmpty()) {
+            sendBadRequest(exchange);
+            return;
+        }
+
+        boolean visible;
+        if (formVisible.getValue().trim().equalsIgnoreCase("true")) {
+            visible = true;
+        } else if (formVisible.getValue().trim().equalsIgnoreCase("false")) {
+            visible = false;
+        } else {
+            sendBadRequest(exchange);
+            return;
+        }
+
+        if (user.setLinkVisible(linkService, linkId, visible)) {
+            exchange.setStatusCode(200);
+            exchange.getResponseSender().send("{}");
+            exchange.endExchange();
+        } else {
+            sendNotFound(exchange, "No such linked account.");
         }
     }
 
